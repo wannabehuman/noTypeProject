@@ -1,4 +1,10 @@
 {
   "name": "noTypeProject",
-  "displayName": "noTypeProject"
+  "displayName": "noTypeProject",
+  "ios": {
+    "bundleIdentifier": "org.reactjs.native.example.noTypeProject",
+    "config": {
+
+    }
+  }
 }
