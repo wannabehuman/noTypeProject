@@ -16,7 +16,7 @@
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		C422143B2C3EE1D90041AEB4 /* AirGoogleMaps in Resources */ = {isa = PBXBuildFile; fileRef = C422143A2C3EE1D90041AEB4 /* AirGoogleMaps */; };
 		C42554C32C2C5F11000B528D /* libsqlite3.0.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C42554C22C2C5F11000B528D /* libsqlite3.0.tbd */; };
-		C42F83782C48144900AFDFEC /* www in Resources */ = {isa = PBXBuildFile; fileRef = C42F83772C48144900AFDFEC /* www */; };
+		C4DD4BA22C5BBD230097379A /* www in Resources */ = {isa = PBXBuildFile; fileRef = C4DD4BA12C5BBD230097379A /* www */; };
 		ED5B7841BC18117B12C04743 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = FFA264821E81714A417BCD14 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
@@ -51,7 +51,7 @@
 		C422143A2C3EE1D90041AEB4 /* AirGoogleMaps */ = {isa = PBXFileReference; lastKnownFileType = folder; name = AirGoogleMaps; path = "../node_modules/react-native-maps/ios/AirGoogleMaps"; sourceTree = "<group>"; };
 		C42554C22C2C5F11000B528D /* libsqlite3.0.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.0.tbd; path = usr/lib/libsqlite3.0.tbd; sourceTree = SDKROOT; };
 		C42554C42C2C5F1F000B528D /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
-		C42F83772C48144900AFDFEC /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; name = www; path = noTypeProject/www; sourceTree = "<group>"; };
+		C4DD4BA12C5BBD230097379A /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; path = www; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		FFA264821E81714A417BCD14 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = noTypeProject/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -97,7 +97,7 @@
 		13B07FAE1A68108700A75B9A /* noTypeProject */ = {
 			isa = PBXGroup;
 			children = (
-				C42F83772C48144900AFDFEC /* www */,
+				C4DD4BA12C5BBD230097379A /* www */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -261,7 +261,7 @@
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				C422143B2C3EE1D90041AEB4 /* AirGoogleMaps in Resources */,
-				C42F83782C48144900AFDFEC /* www in Resources */,
+				C4DD4BA22C5BBD230097379A /* www in Resources */,
 				ED5B7841BC18117B12C04743 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

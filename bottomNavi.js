@@ -4,7 +4,9 @@ import { WebView } from 'react-native-webview';
 import config from './apiKey.js'
 import { SafeAreaView, Platform,Text,View,StyleSheet,Dimensions } from 'react-native';
 const { width, height } = Dimensions.get('window');
+import Geolocation from 'react-native-geolocation-service';
 SQLite.enablePromise(true);
+Geolocation.requestAuthorization('always');
 // console.log(SQLite)
 // import { Text } from 'react-native-reanimated/lib/typescript/Animated';
 
@@ -12,6 +14,7 @@ SQLite.enablePromise(true);
 
 
 export const TimeTable = () => {
+    
     const [data, setData] = useState([]);
     const dbTest = async () => {
         let db;
@@ -19,16 +22,16 @@ export const TimeTable = () => {
             console.log('SQLite:', SQLite);
             db = await SQLite.openDatabase(
                 {
-                    name: 'noksanBus.db',
+                    name: 'realBusTable.db',
                     createFromLocation: 1, // `1`을 사용하여 assets 폴더에서 데이터베이스를 복사
-                    location: 'default'
+                    location: 'Documents'
                 }
             );
-            console.log('DB 열기 성공');
+            console.log(db);
 
             db.transaction(tx => {
                 tx.executeSql(
-                    'SELECT * FROM timeTable;',
+                    'SELECT * FROM realBusTime;',
                     [],
                     (tx, results) => {
                         const rows = results.rows;
@@ -51,6 +54,7 @@ export const TimeTable = () => {
 
     useEffect(() => {
         dbTest();
+
     }, []);
 
     return (
@@ -91,7 +95,17 @@ export const MyLocation = () => {
         </body>
         </html>
         `;
-
+        // Geolocation.getCurrentPosition(
+        //     (position) => {
+        //       console.log(position);
+        //     },
+        //     (error) => {
+        //       // See error code charts below.
+        //       console.log(error.code, error.message);
+        //     },
+            
+        //   );
+     
     return (
         
         <SafeAreaView style={{flex: 1}}>

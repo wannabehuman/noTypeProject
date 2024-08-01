@@ -28,7 +28,7 @@ target 'noTypeProject' do
   pod 'react-native-sqlite-storage', :path => '../node_modules/react-native-sqlite-storage'
   # pod 'GoogleMaps'
   # pod 'react-native-google-maps', path: '../node_modules/react-native-maps'
-
+  pod 'react-native-geolocation-service', :path => '../node_modules/react-native-geolocation-service'
 
 
   target 'noTypeProjectTests' do

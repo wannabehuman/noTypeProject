@@ -4,8 +4,10 @@
  *
  * @format
  */
-
-import React from 'react';
+import {
+  PermissionsAndroid,
+} from 'react-native';
+import React, {useEffect}  from 'react';
 // import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {NavigationContainer} from '@react-navigation/native';
 import BottomTabs  from './bottomTab';
@@ -29,6 +31,24 @@ import {
 
 
 function App (){
+  const CheckPermission = async () => {
+    try {
+      const result = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      );
+      if (result === 'granted') {
+        console.log('success');
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    CheckPermission();
+  
+  }, []);
+
 
   return (
     <NavigationContainer>
