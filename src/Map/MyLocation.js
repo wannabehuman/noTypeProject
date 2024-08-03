@@ -12,7 +12,7 @@ import React, { useEffect, useRef } from 'react';
 import { SafeAreaView, StyleSheet, Dimensions, PermissionsAndroid, Platform } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 import { WebView } from 'react-native-webview';
-import config from './apiKey.js';
+import config from '../util/apiKey.js';
 
 const { width, height } = Dimensions.get('window');
 
@@ -57,7 +57,7 @@ const html = `
 
         window.onload = function() {
             
-            // initMap(33.450701, 126.570667); // 초기 위치 설정
+            initMap(33.450701, 126.570667); // 초기 위치 설정
         }
     </script>
 </body>
