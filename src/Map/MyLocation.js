@@ -1,15 +1,5 @@
-// import React, {useEffect, useState} from 'react';
-// import { SafeAreaView, StyleSheet, Dimensions } from 'react-native';
-// import Geolocation                  from 'react-native-geolocation-service';
-// import { WebView }                  from 'react-native-webview';
-// import config                       from './apiKey.js'
-
-// const { width, height } = Dimensions.get('window');
-// Geolocation.requestAuthorization('always');
-
-
 import React, { useEffect, useRef } from 'react';
-import { SafeAreaView, StyleSheet, Dimensions, PermissionsAndroid, Platform } from 'react-native';
+import { SafeAreaView, StyleSheet, Dimensions, PermissionsAndroid, Platform,View,Text } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 import { WebView } from 'react-native-webview';
 import config from '../util/apiKey.js';
@@ -26,7 +16,7 @@ const html = `
     <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=${config.APIKEY_MAP}"></script>
 </head>
 <body>
-    <div id="map" style="width:500px;height:1000px;"></div>
+    <div id="map" style="width:${width-20}px;height:${height/2.8}px; border-radius:30px;"></div>
     <script type="text/javascript">
         let map = '';
         let marker = '';
@@ -57,7 +47,7 @@ const html = `
 
         window.onload = function() {
             
-            initMap(33.450701, 126.570667); // 초기 위치 설정
+            // initMap(33.450701, 126.570667); // 초기 위치 설정
         }
     </script>
 </body>
@@ -92,19 +82,6 @@ export const MyLocation = () => {
       const getLocation = async () => {
         const hasPermission = await requestLocationPermission();
         if (hasPermission) {
-          Geolocation.getCurrentPosition(
-            (position) => {
-              const { latitude, longitude } = position.coords;
-              if (webViewRef.current) {
-                console.log(`Injecting initMap(${latitude}, ${longitude})`);
-                webViewRef.current.injectJavaScript(`initMap(${latitude}, ${longitude}); true;`);
-              }
-            },
-            (error) => {
-              console.error(error);
-            },
-            { enableHighAccuracy: true }
-          );
   
           Geolocation.watchPosition(
             (position) => {
@@ -148,6 +125,13 @@ export const MyLocation = () => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      <View style={styles.top}>
+         <View style={styles.topCard}>
+        
+        </View>  
+      </View>  
+
+      <View style={styles.map}>
       <WebView
         ref={webViewRef}
         originWhitelist={['*']}
@@ -161,20 +145,77 @@ export const MyLocation = () => {
         }}
         onLoadEnd={handleWebViewLoad}
       />
+
+      </View>
+      <View style={styles.info}>
+        <View style={styles.leftItem}>
+          <Text>sdsd</Text>
+        </View>
+        <View style={styles.rightItem}>
+          
+        </View>
+      </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  top:{
+    flex:0.5,
+    backgroundColor: 'white',
+  
+  },
+  topCard:{
+    borderRadius: 30,
+    backgroundColor: '#47bf80',
+    marginTop: 10,
+    marginBottom: 10,
+    marginLeft:10,
+    marginRight:10,
+    flex:1.5
+  },
+  info:{
+    flex: 1,
+    width: '100%',
+    backgroundColor: 'white',
+    flexDirection : 'row',
+    
+    
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    
   },
-  map: {
+  leftItem:{
+    borderRadius: 10,
+    margin: 50,
+    marginRight:5,
+    marginLeft:10,
     flex: 1,
-    width: width,
-    height: height,
+    height: '70%', 
+    // backgroundColor:'yellow',
+    borderWidth: 2,
+    borderColor: 'gray',
+    alignItems : 'left',
+  },
+  rightItem:{
+    borderRadius: 10,
+    marginTop: 50,
+    marginRight:10,
+    marginLeft:5,
+    flex: 1,
+    height: '70%', 
+    borderWidth: 2,
+    borderColor: 'gray',
+    // backgroundColor:'green',
+    alignItems : 'right',
+  },
+  
+  map: {
+    flex: 1.2,
+    
   },
 });
 
