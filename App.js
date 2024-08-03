@@ -10,24 +10,8 @@ import {
 import React, {useEffect}  from 'react';
 // import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {NavigationContainer} from '@react-navigation/native';
-import BottomTabs  from './bottomTab';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import BottomTabs  from './src/components/Footer/BottomTab';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
 
 function App (){
@@ -50,6 +34,46 @@ function App (){
   }, []);
 
 
+  useEffect(() => {
+    const getLocation = async () => {
+      const hasPermission = await requestLocationPermission();
+      if (hasPermission) {
+        Geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            if (webViewRef.current) {
+              webViewRef.current.injectJavaScript(`initMap(${latitude}, ${longitude}); true;`);
+            }
+          },
+          (error) => {
+            console.error(error);
+          },
+          { enableHighAccuracy: true }
+        );
+
+        Geolocation.watchPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            if (webViewRef.current) {
+              webViewRef.current.injectJavaScript(`updatePosition(${latitude}, ${longitude}); true;`);
+            }
+          },
+          (error) => {
+            console.error(error);
+          },
+          {
+            enableHighAccuracy: true,
+            distanceFilter: 1,
+            interval: 5000,
+            fastestInterval: 2000,
+          }
+        );
+      }
+    };
+    getLocation();
+  }, []);
+
+  
   return (
     <NavigationContainer>
     <BottomTabs />

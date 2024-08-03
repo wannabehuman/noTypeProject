@@ -2,7 +2,7 @@
 #
 .DS_Store
 
-apiKey.js
+./src/Map/apiKey.js
 
 # Xcode
 #
