@@ -126,7 +126,7 @@ export const MyLocation = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.top}>
-         <View style={styles.topCard}>
+         <View style={[styles.topCard,styles.shadow_top]}>
         
         </View>  
       </View>  
@@ -148,10 +148,10 @@ export const MyLocation = () => {
 
       </View>
       <View style={styles.info}>
-        <View style={styles.leftItem}>
+        <View style={[styles.leftItem, styles.shadow]}>
           <Text>sdsd</Text>
         </View>
-        <View style={styles.rightItem}>
+        <View style={[styles.rightItem,styles.shadow]}>
           
         </View>
       </View>
@@ -189,27 +189,42 @@ const styles = StyleSheet.create({
     
   },
   leftItem:{
-    borderRadius: 10,
+    borderRadius: 30,
     margin: 50,
     marginRight:5,
     marginLeft:10,
     flex: 1,
     height: '70%', 
     // backgroundColor:'yellow',
-    borderWidth: 2,
-    borderColor: 'gray',
+    // borderWidth: 2,
+    // borderColor: 'gray',
     alignItems : 'left',
+    
+  },
+  shadow: {
+    shadowColor: 'black',
+    shadowOpacity: 0.46,
+    shadowOffset: { width: 2, height: 2},
+    shadowRadius: 50,
+    elevation: 3,
+    backgroundColor: 'white'
+  },
+  shadow_top: {
+    shadowColor: 'black',
+    shadowOpacity: 0.46,
+    shadowOffset: { width: 2, height: 2},
+    elevation: 3,
   },
   rightItem:{
-    borderRadius: 10,
+    borderRadius: 30,
     marginTop: 50,
     marginRight:10,
     marginLeft:5,
     flex: 1,
     height: '70%', 
-    borderWidth: 2,
-    borderColor: 'gray',
-    alignItems : 'right',
+    // borderWidth: 2,
+    // borderColor: 'gray',
+    // alignItems : 'right',
   },
   
   map: {
