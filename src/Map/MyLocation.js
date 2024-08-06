@@ -77,7 +77,10 @@ const requestLocationPermission = async () => {
 };
 export const MyLocation = () => {
     const webViewRef = useRef(null);
-  
+    const start = "하단"
+    const end   = "녹산"
+
+
     useEffect(() => {
       const getLocation = async () => {
         const hasPermission = await requestLocationPermission();
@@ -126,10 +129,8 @@ export const MyLocation = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.top}>
-         <View style={[styles.topCard,styles.shadow_top]}>
-        
-        </View>  
-      </View>  
+         <View style={[styles.topCard,styles.shadow_top]}></View>
+      </View>
 
       <View style={styles.map}>
       <WebView
@@ -145,14 +146,43 @@ export const MyLocation = () => {
         }}
         onLoadEnd={handleWebViewLoad}
       />
-
       </View>
       <View style={styles.info}>
         <View style={[styles.leftItem, styles.shadow]}>
-          <Text>sdsd</Text>
+          <View style={styles.narrowBox}>
+            <View style={{flex:1}}>
+              <View style={styles.circle}>
+                <View style={styles.innerCircle}></View>
+              </View>
+            </View>
+            <View style={{flex:1}}>
+              
+            </View>
+            <View style={{flex:1}}>
+              <View style={styles.circle}>
+                <View style={styles.innerCircle}></View>
+              </View>
+            </View>
+          </View>
+          <View style={styles.widerBox}>
+            <View style={{flex:1}}>
+              <Text style={styles.largeFont}>{start}</Text>
+            </View>
+            <View style={{flex:1}}>
+
+            </View>
+            <View style={{flex:1}}>
+              <Text style={styles.largeFont}>{end}</Text>
+            </View>
+          </View>
         </View>
         <View style={[styles.rightItem,styles.shadow]}>
-          
+          <View style={styles.container}>
+
+          </View>
+          <View style={styles.container}>
+
+          </View>
         </View>
       </View>
     </SafeAreaView>
@@ -160,11 +190,38 @@ export const MyLocation = () => {
 };
 
 const styles = StyleSheet.create({
+  largeFont:{
+    fontSize:30
+  },
+  innerCircle:{
+    marginTop: 6,
+    marginLeft : 6.5,
+    width: '40%', // 동그라미의 너비
+    height: '40%', // 동그라미의 높이
+    borderRadius: 50, // 동그라미의 반지름 (width / 2)
+    backgroundColor: 'white', // 동그라미의 배경색    
+  },
+  circle: {
+    marginTop: 30,
+    marginLeft : 25,
+    width: '35%', // 동그라미의 너비
+    height: '30%', // 동그라미의 높이
+    borderRadius: 50, // 동그라미의 반지름 (width / 2)
+    backgroundColor: 'blue', // 동그라미의 배경색
+  },
+  narrowBox:{
+    flex: 2,
+    // backgroundColor:"red"
+  },
+  widerBox:{
+    flex:4,
+    // backgroundColor:"blue"
+  },
   top:{
     flex:0.5,
     backgroundColor: 'white',
-  
   },
+  //상단 박스 스타일
   topCard:{
     borderRadius: 30,
     backgroundColor: '#47bf80',
@@ -179,28 +236,23 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: 'white',
     flexDirection : 'row',
-    
-    
   },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    
   },
   leftItem:{
     borderRadius: 30,
-    margin: 50,
+    marginTop: 30,
     marginRight:5,
     marginLeft:10,
     flex: 1,
-    height: '70%', 
-    // backgroundColor:'yellow',
-    // borderWidth: 2,
-    // borderColor: 'gray',
+    height: '80%', 
     alignItems : 'left',
-    
+    flexDirection : 'row'
   },
+  //그림자 기본
   shadow: {
     shadowColor: 'black',
     shadowOpacity: 0.46,
@@ -209,22 +261,21 @@ const styles = StyleSheet.create({
     elevation: 3,
     backgroundColor: 'white'
   },
+  // 상단 박스 그림자
   shadow_top: {
     shadowColor: 'black',
     shadowOpacity: 0.46,
     shadowOffset: { width: 2, height: 2},
-    elevation: 3,
+    elevation: 6,
   },
   rightItem:{
     borderRadius: 30,
-    marginTop: 50,
+    marginTop: 30,
     marginRight:10,
     marginLeft:5,
     flex: 1,
-    height: '70%', 
-    // borderWidth: 2,
-    // borderColor: 'gray',
-    // alignItems : 'right',
+    height: '80%', 
+    flexDirection : 'column'
   },
   
   map: {
