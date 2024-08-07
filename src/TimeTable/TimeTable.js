@@ -132,40 +132,47 @@ export const TimeTable = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Picker
-        selectedValue={selectedStartLocation}
-        style={styles.picker}
-        onValueChange={itemValue => setSelectedStartLocation(itemValue)}>
-        <Picker.Item label="Select Start Location" value="0" />
-        {uniqueStartLocations.map((item, index) => (
-          <Picker.Item key={index} label={item} value={item} />
-        ))}
-      </Picker>
-      <Picker
-        selectedValue={selectedEndLocation}
-        style={styles.picker}
-        onValueChange={itemValue => setSelectedEndLocation(itemValue)}>
-        <Picker.Item label="Select End Location" value="0" />
-        {uniqueEndLocations.map((item, index) => (
-          <Picker.Item key={index} label={item} value={item} />
-        ))}
-      </Picker>
-      <View style={styles.switchContainer}>
-        <Text>{isHappy ? '퇴근' : '출근'}</Text>
-        <Switch
-          value={isHappy}
-          onValueChange={() => setIsHappy(previousState => !previousState)}
-        />
+      {/* 검색 창 */}
+      <View style={styles.searchBox}>
+        <Picker
+          selectedValue={selectedStartLocation}
+          style={styles.picker}
+          onValueChange={itemValue => setSelectedStartLocation(itemValue)}>
+          <Picker.Item label="출발지 선택" value="0" />
+          {uniqueStartLocations.map((item, index) => (
+            <Picker.Item key={index} label={item} value={item} />
+          ))}
+        </Picker>
+        <Picker
+          selectedValue={selectedEndLocation}
+          style={styles.picker}
+          onValueChange={itemValue => setSelectedEndLocation(itemValue)}>
+          <Picker.Item label="도착지 선택" value="0" />
+          {uniqueEndLocations.map((item, index) => (
+            <Picker.Item key={index} label={item} value={item} />
+          ))}
+        </Picker>
+        <View style={styles.switchContainer}>
+          <Text>{isHappy ? '퇴근' : '출근'}</Text>
+          <Switch
+            value={isHappy}
+            onValueChange={() => setIsHappy(previousState => !previousState)}
+          />
+        </View>
       </View>
+
+      {/* 결과 값 */}
       <ScrollView>
         {data.length > 0 ? (
-          data.map((item, index) => (
-            <Text key={index} style={styles.itemText}>
-              GUBUN: {item.GUBUN}, TIMES: {item.TIMES}, INDEX: {item.INDEX},
-              MY_LOCATION: {item.MY_LOCATION}, END_LOCATION: {item.END_LOCATION}
-              , START_LOCATION: {item.START_LOCATION}
-            </Text>
-          ))
+          <View>
+            {data.map((item, index) => (
+              <Text key={index} style={styles.itemText}>
+                GUBUN: {item.GUBUN}, TIMES: {item.TIMES}, INDEX: {item.INDEX},
+                MY_LOCATION: {item.MY_LOCATION}, END_LOCATION:{' '}
+                {item.END_LOCATION}, START_LOCATION: {item.START_LOCATION}
+              </Text>
+            ))}
+          </View>
         ) : (
           <Text style={styles.loadingText}>로딩 중...</Text>
         )}
