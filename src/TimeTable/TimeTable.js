@@ -166,19 +166,19 @@ export const TimeTable = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 10
+        // padding: 10
     },
     picker: {
-        height: 50,
+        height: '10%',
         width: '100%',
     },
     itemText: {
-        padding: 10,
-        borderBottomWidth: 1,
+        // padding: 10,
+        // borderBottomWidth: 1,
         borderBottomColor: '#ccc'
     },
     loadingText: {
-        padding: 10,
+        // padding: 10,
         textAlign: 'center'
     }
 });
