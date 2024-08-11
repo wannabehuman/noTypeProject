@@ -9,19 +9,16 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import SQLite from 'react-native-sqlite-storage';
-import {Picker} from '@react-native-picker/picker';
 import {pickContext} from '../../App';
+import {SelectOption} from '../components/Util/SelectOption';
 SQLite.enablePromise(true);
 
 export const TimeTable = () => {
   // 출발 및 도착 선택값 저장
-  const {value, setValue} = React.useContext(pickContext);
+  const {setPickLocation, setStOption, setEdOption, selectSt, selectEd} =
+    React.useContext(pickContext);
 
   const [data, setData] = useState([]);
-  const [uniqueStartLocations, setUniqueStartLocations] = useState([]);
-  const [uniqueEndLocations, setUniqueEndLocations] = useState([]);
-  const [selectedEndLocation, setSelectedEndLocation] = useState('');
-  const [selectedStartLocation, setSelectedStartLocation] = useState('');
   const [isHappy, setIsHappy] = useState(true);
 
   const getAllData = async () => {
@@ -46,7 +43,7 @@ export const TimeTable = () => {
             for (let i = 0; i < rows.length; i++) {
               startLocations.push(rows.item(i).START_LOCATION);
             }
-            setUniqueStartLocations(startLocations);
+            setStOption(startLocations);
           },
           error => {
             console.log('출발지 조회 에러:', error);
@@ -62,7 +59,7 @@ export const TimeTable = () => {
             for (let i = 0; i < rows.length; i++) {
               endLocations.push(rows.item(i).END_LOCATION);
             }
-            setUniqueEndLocations(endLocations);
+            setEdOption(endLocations);
           },
           error => {
             console.log('도착지 조회 에러:', error);
@@ -128,37 +125,16 @@ export const TimeTable = () => {
 
   useEffect(() => {
     fetchFilteredData(
-      selectedStartLocation !== '0' ? selectedStartLocation : '',
-      selectedEndLocation !== '0' ? selectedEndLocation : '',
+      selectSt !== '0' ? selectSt : '',
+      selectEd !== '0' ? selectEd : '',
       isHappy ? 'HAPPY' : 'SAD',
     );
-  }, [selectedStartLocation, selectedEndLocation, isHappy]);
+  }, [selectSt, selectEd, isHappy]);
 
   return (
     <SafeAreaView style={styles.container}>
       {/* 검색 창 */}
-      <View style={styles.searchBox}>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={selectedStartLocation}
-            style={styles.pickerSt}
-            onValueChange={itemValue => setSelectedStartLocation(itemValue)}>
-            <Picker.Item label="출발지 선택" value="0" />
-            {uniqueStartLocations.map((item, index) => (
-              <Picker.Item key={index} label={item} value={item} />
-            ))}
-          </Picker>
-        </View>
-        <Picker
-          selectedValue={selectedEndLocation}
-          style={styles.pickerEd}
-          onValueChange={itemValue => setSelectedEndLocation(itemValue)}>
-          <Picker.Item label="도착지 선택" value="0" />
-          {uniqueEndLocations.map((item, index) => (
-            <Picker.Item key={index} label={item} value={item} />
-          ))}
-        </Picker>
-      </View>
+      <SelectOption></SelectOption>
       {/* 결과 값 */}
 
       <View style={styles.scrollViewContainer}>
@@ -177,7 +153,10 @@ export const TimeTable = () => {
                   key={index}
                   style={styles.itemText}
                   onPress={() =>
-                    setValue({st: item.START_LOCATION, ed: item.END_LOCATION})
+                    setPickLocation({
+                      st: item.START_LOCATION,
+                      ed: item.END_LOCATION,
+                    })
                   }>
                   GUBUN: {item.GUBUN}, TIMES: {item.TIMES}, INDEX: {item.INDEX},
                   MY_LOCATION: {item.MY_LOCATION}, END_LOCATION:{' '}
@@ -199,34 +178,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
   },
-  searchBox: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    width: '100%',
-    height: 140,
-    backgroundColor: 'white',
-
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: {width: 0, height: 1},
-    shadowRadius: 5,
-    elevation: 5,
-  },
-  pickerContainer: {
-    width: '90%',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    paddingBottom: 10,
-  },
-  pickerSt: {
-    height: 60,
-    width: '100%',
-  },
-  pickerEd: {
-    height: 60,
-    width: '90%',
-  },
   scrollViewContainer: {
     borderRadius: 10,
     backgroundColor: 'white',
@@ -234,6 +185,7 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 30,
     padding: 30,
+    paddingBottom: 100,
 
     shadowColor: '#000',
     shadowOpacity: 0.1,

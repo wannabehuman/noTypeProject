@@ -13,7 +13,11 @@ import BottomTabs from './src/components/Footer/BottomTab';
 export const pickContext = createContext();
 
 function App() {
-  const [value, setValue] = useState({});
+  const [pickLocation, setPickLocation] = useState({});
+  const [stOption, setStOption] = useState([]);
+  const [edOption, setEdOption] = useState([]);
+  const [selectSt, setSelectSt] = useState('');
+  const [selectEd, setSelectEd] = useState('');
 
   const CheckPermission = async () => {
     try {
@@ -33,8 +37,8 @@ function App() {
   }, []);
 
   useEffect(() => {
-    console.log('Current value:', value);
-  }, [value]);
+    console.log('Current pickLocation:', pickLocation);
+  }, [pickLocation]);
 
   useEffect(() => {
     const getLocation = async () => {
@@ -80,7 +84,19 @@ function App() {
   }, []);
 
   return (
-    <pickContext.Provider value={{value, setValue}}>
+    <pickContext.Provider
+      value={{
+        pickLocation,
+        setPickLocation,
+        stOption,
+        setStOption,
+        edOption,
+        setEdOption,
+        selectSt,
+        setSelectSt,
+        selectEd,
+        setSelectEd,
+      }}>
       <NavigationContainer>
         <BottomTabs />
       </NavigationContainer>
