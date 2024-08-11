@@ -46,10 +46,11 @@ const html = `
             marker.setMap(map);
 
             var linePath = [
-              new kakao.maps.LatLng(35.19403, 129.0615167),
-              new kakao.maps.LatLng(36,129),
-              new kakao.maps.LatLng(36.01,129.1) 
+              new kakao.maps.LatLng(35.106379,128.963941),
+              new kakao.maps.LatLng(35.108612,128.930943),
+              new kakao.maps.LatLng(35.089382,128.880689),
             ];
+            
             var polyline = new kakao.maps.Polyline({
               path: linePath, // 선을 구성하는 좌표배열 입니다
               strokeWeight: 5, // 선의 두께 입니다
@@ -59,9 +60,12 @@ const html = `
             });
     
             polyline.setMap(map);  
+            
         }
 
         function updatePosition(lat, lng) {
+
+          
             console.log('updatePosition called with:', lat, lng);
             var moveLatLon = new kakao.maps.LatLng(lat, lng);
             map.setCenter(moveLatLon);
@@ -158,6 +162,22 @@ export const MyLocation = () => {
                         console.log('도착지 조회 에러:', error);
                     }
                 );
+                tx.executeSql(
+                  'SELECT LONGTITUDE, LATITUDE, ST.STOP_BY ,ST.SEQ FROM lati_lonti AS WI INNER JOIN realStopBy AS ST ON ST.STOP_BY = WI.STOP_BY_CD;',
+                  [],
+                  (tx, results) => {
+                      const rows = results.rows;
+                      let stopBy = [];
+                      for (let i = 0; i < rows.length; i++) {
+                        stopBy.push({stopBy: rows.item(i).STOP_BY,latitude: rows.item(i).LATITUDE, longitude: rows.item(i).LONGTITUDE});
+                      }
+                      console.log(stopBy);
+                      // setUniqueStartLocations(startLocations);
+                  },
+                  error => {
+                      console.log('경로 조회 에러:', error);
+                  }
+              );
             });
 
         } catch (error) {
