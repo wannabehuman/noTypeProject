@@ -10,9 +10,13 @@ import {
 import React, {useEffect, useState} from 'react';
 import SQLite from 'react-native-sqlite-storage';
 import {Picker} from '@react-native-picker/picker';
+import {pickContext} from '../../App';
 SQLite.enablePromise(true);
 
 export const TimeTable = () => {
+  // 출발 및 도착 선택값 저장
+  const {value, setValue} = React.useContext(pickContext);
+
   const [data, setData] = useState([]);
   const [uniqueStartLocations, setUniqueStartLocations] = useState([]);
   const [uniqueEndLocations, setUniqueEndLocations] = useState([]);
@@ -134,49 +138,58 @@ export const TimeTable = () => {
     <SafeAreaView style={styles.container}>
       {/* 검색 창 */}
       <View style={styles.searchBox}>
-        <Picker
-          selectedValue={selectedStartLocation}
-          style={styles.picker}
-          onValueChange={itemValue => setSelectedStartLocation(itemValue)}>
-          <Picker.Item label="출발지 선택" value="0" />
-          {uniqueStartLocations.map((item, index) => (
-            <Picker.Item key={index} label={item} value={item} />
-          ))}
-        </Picker>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={selectedStartLocation}
+            style={styles.pickerSt}
+            onValueChange={itemValue => setSelectedStartLocation(itemValue)}>
+            <Picker.Item label="출발지 선택" value="0" />
+            {uniqueStartLocations.map((item, index) => (
+              <Picker.Item key={index} label={item} value={item} />
+            ))}
+          </Picker>
+        </View>
         <Picker
           selectedValue={selectedEndLocation}
-          style={styles.picker}
+          style={styles.pickerEd}
           onValueChange={itemValue => setSelectedEndLocation(itemValue)}>
           <Picker.Item label="도착지 선택" value="0" />
           {uniqueEndLocations.map((item, index) => (
             <Picker.Item key={index} label={item} value={item} />
           ))}
         </Picker>
-        <View style={styles.switchContainer}>
-          <Text>{isHappy ? '퇴근' : '출근'}</Text>
-          <Switch
-            value={isHappy}
-            onValueChange={() => setIsHappy(previousState => !previousState)}
-          />
-        </View>
       </View>
-
       {/* 결과 값 */}
-      <ScrollView>
-        {data.length > 0 ? (
-          <View>
-            {data.map((item, index) => (
-              <Text key={index} style={styles.itemText}>
-                GUBUN: {item.GUBUN}, TIMES: {item.TIMES}, INDEX: {item.INDEX},
-                MY_LOCATION: {item.MY_LOCATION}, END_LOCATION:{' '}
-                {item.END_LOCATION}, START_LOCATION: {item.START_LOCATION}
-              </Text>
-            ))}
+
+      <View style={styles.scrollViewContainer}>
+        <ScrollView style={styles.ScrollView}>
+          <View style={styles.switchContainer}>
+            <Text>{isHappy ? '퇴근' : '출근'}</Text>
+            <Switch
+              value={isHappy}
+              onValueChange={() => setIsHappy(previousState => !previousState)}
+            />
           </View>
-        ) : (
-          <Text style={styles.loadingText}>로딩 중...</Text>
-        )}
-      </ScrollView>
+          {data.length > 0 ? (
+            <View>
+              {data.map((item, index) => (
+                <Text
+                  key={index}
+                  style={styles.itemText}
+                  onPress={() =>
+                    setValue({st: item.START_LOCATION, ed: item.END_LOCATION})
+                  }>
+                  GUBUN: {item.GUBUN}, TIMES: {item.TIMES}, INDEX: {item.INDEX},
+                  MY_LOCATION: {item.MY_LOCATION}, END_LOCATION:{' '}
+                  {item.END_LOCATION}, START_LOCATION: {item.START_LOCATION}
+                </Text>
+              ))}
+            </View>
+          ) : (
+            <Text style={styles.loadingText}>로딩 중...</Text>
+          )}
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 };
@@ -186,9 +199,47 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
   },
-  picker: {
-    height: 50,
+  searchBox: {
+    flexDirection: 'column',
+    alignItems: 'center',
     width: '100%',
+    height: 140,
+    backgroundColor: 'white',
+
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: {width: 0, height: 1},
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  pickerContainer: {
+    width: '90%',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    paddingBottom: 10,
+  },
+  pickerSt: {
+    height: 60,
+    width: '100%',
+  },
+  pickerEd: {
+    height: 60,
+    width: '90%',
+  },
+  scrollViewContainer: {
+    borderRadius: 10,
+    backgroundColor: 'white',
+    minHeight: '100%',
+    width: '100%',
+    marginTop: 30,
+    padding: 30,
+
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: {width: 0, height: 2},
+    shadowRadius: 5,
+    elevation: 5,
   },
   switchContainer: {
     flexDirection: 'row',
