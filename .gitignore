@@ -77,3 +77,11 @@ yarn-error.log
 
 
 src/util/*
+
+apiKey.js
+._apiKey.js
+apiKey.js.zip
+gradlew.bat
+gradlew
+gradle-wrapper.jar
+gradle-wrapper.properties

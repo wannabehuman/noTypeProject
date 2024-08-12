@@ -4,17 +4,21 @@
  *
  * @format
  */
-import {
-  PermissionsAndroid,
-} from 'react-native';
-import React, {useEffect}  from 'react';
+import {PermissionsAndroid} from 'react-native';
+import React, {createContext, useState, useEffect} from 'react';
 // import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {NavigationContainer} from '@react-navigation/native';
-import BottomTabs  from './src/components/Footer/BottomTab';
+import BottomTabs from './src/components/Footer/BottomTab';
 
+export const pickContext = createContext();
 
+function App() {
+  const [pickLocation, setPickLocation] = useState({});
+  const [stOption, setStOption] = useState([]);
+  const [edOption, setEdOption] = useState([]);
+  const [selectSt, setSelectSt] = useState('');
+  const [selectEd, setSelectEd] = useState('');
 
-function App (){
   const CheckPermission = async () => {
     try {
       const result = await PermissionsAndroid.request(
@@ -30,35 +34,41 @@ function App (){
 
   useEffect(() => {
     CheckPermission();
-  
   }, []);
 
+  useEffect(() => {
+    console.log('Current pickLocation:', pickLocation);
+  }, [pickLocation]);
 
   useEffect(() => {
     const getLocation = async () => {
       const hasPermission = await requestLocationPermission();
       if (hasPermission) {
         Geolocation.getCurrentPosition(
-          (position) => {
-            const { latitude, longitude } = position.coords;
+          position => {
+            const {latitude, longitude} = position.coords;
             if (webViewRef.current) {
-              webViewRef.current.injectJavaScript(`initMap(${latitude}, ${longitude}); true;`);
+              webViewRef.current.injectJavaScript(
+                `initMap(${latitude}, ${longitude}); true;`,
+              );
             }
           },
-          (error) => {
+          error => {
             console.error(error);
           },
-          { enableHighAccuracy: true }
+          {enableHighAccuracy: true},
         );
 
         Geolocation.watchPosition(
-          (position) => {
-            const { latitude, longitude } = position.coords;
+          position => {
+            const {latitude, longitude} = position.coords;
             if (webViewRef.current) {
-              webViewRef.current.injectJavaScript(`updatePosition(${latitude}, ${longitude}); true;`);
+              webViewRef.current.injectJavaScript(
+                `updatePosition(${latitude}, ${longitude}); true;`,
+              );
             }
           },
-          (error) => {
+          error => {
             console.error(error);
           },
           {
@@ -66,18 +76,31 @@ function App (){
             distanceFilter: 1,
             interval: 5000,
             fastestInterval: 2000,
-          }
+          },
         );
       }
     };
     getLocation();
   }, []);
 
-  
   return (
-    <NavigationContainer>
-    <BottomTabs />
-  </NavigationContainer>
+    <pickContext.Provider
+      value={{
+        pickLocation,
+        setPickLocation,
+        stOption,
+        setStOption,
+        edOption,
+        setEdOption,
+        selectSt,
+        setSelectSt,
+        selectEd,
+        setSelectEd,
+      }}>
+      <NavigationContainer>
+        <BottomTabs />
+      </NavigationContainer>
+    </pickContext.Provider>
   );
 }
 
