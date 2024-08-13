@@ -37,6 +37,7 @@ const styles = StyleSheet.create({
   searchBox: {
     flexDirection: 'column',
     alignItems: 'center',
+    justifyContent: 'center',
     width: '100%',
     height: 140,
     backgroundColor: 'white',
@@ -52,14 +53,13 @@ const styles = StyleSheet.create({
     width: '90%',
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
-    paddingBottom: 10,
   },
   pickerSt: {
-    height: 60,
+    height: 65,
     width: '100%',
   },
   pickerEd: {
-    height: 60,
+    height: 65,
     width: '90%',
   },
 });
