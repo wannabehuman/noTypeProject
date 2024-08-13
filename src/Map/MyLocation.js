@@ -31,7 +31,6 @@ const html = `
         let marker = '';
 
         function initMap(lat, lng) {
-            console.log('initMap called with:', lat, lng);
             var container = document.getElementById('map');
             var options = { 
                 center: new kakao.maps.LatLng(lat, lng),
@@ -45,31 +44,83 @@ const html = `
             });
             marker.setMap(map);
 
-            var linePath = [
-              new kakao.maps.LatLng(35.106379,128.963941),
-              new kakao.maps.LatLng(35.108612,128.930943),
-              new kakao.maps.LatLng(35.089382,128.880689),
-            ];
-            
-            var polyline = new kakao.maps.Polyline({
-              path: linePath, // 선을 구성하는 좌표배열 입니다
-              strokeWeight: 5, // 선의 두께 입니다
-              strokeColor: '#FFAE00', // 선의 색깔입니다
-              strokeOpacity: 0.7, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
-              strokeStyle: 'solid' // 선의 스타일입니다
-            });
-    
-            polyline.setMap(map);  
             
         }
+        async function setMarker(arrayData){
 
-        function updatePosition(lat, lng) {
-
+          const tempData = arrayData.map(v => {
+              return {
+                title:  v.STOP_BY, 
+                latlng: new kakao.maps.LatLng(v.LATITUDE, v.LONGTITUDE)
+              }
+            })
           
-            console.log('updatePosition called with:', lat, lng);
-            var moveLatLon = new kakao.maps.LatLng(lat, lng);
-            map.setCenter(moveLatLon);
-            marker.setPosition(moveLatLon);
+          for(let i = 0; i < tempData.length; i++) {
+
+            marker = new kakao.maps.Marker({
+                map: map, 
+                position: tempData[i].latlng,
+                title : tempData[i].title,
+            });
+          }
+
+          const url = "https://apis-navi.kakaomobility.com/v1/waypoints/directions" ;
+
+          const origin = arrayData[0].LATITUDE+','+arrayData[0].LONGTITUDE; 
+          const destination = arrayData[arrayData.length - 1].LATITUDE+','+arrayData[arrayData.length - 1].LONGTITUDE;
+          
+
+          const headers = {
+            Authorization: "KakaoAK ${config.APIKEY_MAP}",
+            'Content-Type': 'application/json'
+          };
+          const queryParams = new URLSearchParams({
+                origin: origin,
+                destination: destination
+          });
+
+          const requestUrl = url+"?"+queryParams;
+
+          try {
+            const response = await fetch(requestUrl, {
+              method: 'GET',
+              headers: headers
+            });
+
+            if (!response.ok) {
+              
+            }
+
+            const data = await response.json();
+            const linePath = [];
+            data.routes[0].sections[0].roads.forEach(router => {
+              router.vertexes.forEach((vertex, index) => {
+                             
+                if (index % 2 === 0) {
+                  linePath.push(new kakao.maps.LatLng(router.vertexes[index + 1], router.vertexes[index]));
+                }
+              });
+            });
+            var polyline = new kakao.maps.Polyline({
+              path: linePath,
+              strokeWeight: 5,
+              strokeColor: '#000000',
+              strokeOpacity: 0.7,
+              strokeStyle: 'solid'
+            }); 
+            polyline.setMap(map);
+            console.log(data)
+          } catch (error) {
+            console.error('Error:', error);
+          }
+
+        }
+        function updatePosition(lat, lng) {
+        
+          
+          var moveLatLon = new kakao.maps.LatLng(lat, lng);
+          map.setCenter(moveLatLon);
+          marker.setPosition(moveLatLon);
             
         }
 
@@ -107,8 +158,6 @@ const requestLocationPermission = async () => {
 };
 export const MyLocation = () => {
     const webViewRef = useRef(null);
-    const start = "하단"
-    const end   = "녹산"
 
     const [data, setData] = useState([]);
     const [uniqueStartLocations, setUniqueStartLocations] = useState([]);
@@ -162,22 +211,6 @@ export const MyLocation = () => {
                         console.log('도착지 조회 에러:', error);
                     }
                 );
-                tx.executeSql(
-                  'SELECT LONGTITUDE, LATITUDE, ST.STOP_BY ,ST.SEQ FROM lati_lonti AS WI INNER JOIN realStopBy AS ST ON ST.STOP_BY = WI.STOP_BY_CD;',
-                  [],
-                  (tx, results) => {
-                      const rows = results.rows;
-                      let stopBy = [];
-                      for (let i = 0; i < rows.length; i++) {
-                        stopBy.push({stopBy: rows.item(i).STOP_BY,latitude: rows.item(i).LATITUDE, longitude: rows.item(i).LONGTITUDE});
-                      }
-                      console.log(stopBy);
-                      // setUniqueStartLocations(startLocations);
-                  },
-                  error => {
-                      console.log('경로 조회 에러:', error);
-                  }
-              );
             });
 
         } catch (error) {
@@ -197,7 +230,7 @@ export const MyLocation = () => {
             );
 
             db.transaction(tx => {
-                let query = 'SELECT * FROM realBusTime WHERE 1=1';
+                let query = 'SELECT LONGTITUDE, LATITUDE, ST.STOP_BY ,ST.SEQ FROM lati_lonti AS WI INNER JOIN realStopBy AS ST ON ST.STOP_BY = WI.STOP_BY_CD WHERE 1=1';
                 const params = [];
 
                 if (startLocation) {
@@ -209,10 +242,7 @@ export const MyLocation = () => {
                     query += ' AND END_LOCATION = ?';
                     params.push(endLocation);
                 }
-                if (endLocation) {
-                    query += ' AND END_LOCATION = ?';
-                    params.push(endLocation);
-                }
+                
 
                 tx.executeSql(
                     query,
@@ -234,17 +264,24 @@ export const MyLocation = () => {
         } catch (error) {
             console.log('DB 연결 중 에러 발생:', error);
         }
+      
     };
 
     useEffect(() => {
         getAllData();
+        
     }, []);
 
     useEffect(() => {
         fetchFilteredData(selectedStartLocation !== "0" ? selectedStartLocation : "", selectedEndLocation !== "0" ? selectedEndLocation : "");
+        
     }, [selectedStartLocation, selectedEndLocation]);
 
-
+      useEffect(() => {
+        if (data.length > 0) {
+            webViewRef.current.injectJavaScript(`setMarker(${JSON.stringify(data)}); true;`);
+        }
+    }, [data]); // 데이터를 주입할 때 상태 업데이트 후에 주입
 
 
 
@@ -257,8 +294,9 @@ export const MyLocation = () => {
             (position) => {
               const { latitude, longitude } = position.coords;
               if (webViewRef.current) {
-                console.log(`Injecting updatePosition(${latitude}, ${longitude})`);
+                // console.log(`Injecting updatePosition(${latitude}, ${longitude})`);
                 webViewRef.current.injectJavaScript(`updatePosition(${latitude}, ${longitude}); true;`);
+              
               }
             },
             (error) => {
@@ -517,91 +555,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-
-
-
-// export const MyLocation = () => {
-//     const html = `
-//     <!DOCTYPE html>
-//     <html>
-//     <head>
-//         <meta charset="utf-8">
-//         <meta name="viewport" content="width=device-width, initial-scale=1">
-//         <title>카카오 맵</title>
-//         </head>
-//         <body>
-//         <div id="map" style="width:500px;height:1000px;"></div>
-//         <script type="text/javascript" src="http://dapi.kakao.com/v2/maps/sdk.js?appkey=${config.APIKEY_MAP}">
-        
-//         </script>
-//         <script type="text/javascript">
-//         console.log("ass");
-//         (function () {
-//             const container = document.getElementById('map');
-//             container.innerHTML = new kakao.maps.LatLng()
-//             const options = { 
-//                 center: new kakao.maps.LatLng(33.450701, 126.570667),
-//                 level: 3
-//             };
-            
-//             const map = new kakao.maps.Map(container, options);
-//             // const geocoder = new kakao.maps.services.Geocoder()
-//             var markerPosition  = new kakao.maps.LatLng(33.450701, 126.570667); 
-
-//             var marker = new kakao.maps.Marker({
-//                 position: markerPosition
-//             });
-//             marker.setMap(map);
-//         })();
-//         </script>       
-//         </body>
-//         </html>
-//         `;
-//         // Geolocation.watchPosition()(
-//         //     (position) => {
-//         //       console.log(position);
-//         //     },
-//         //     (error) => {
-//         //       // See error code charts below.
-//         //       console.log(error.code, error.message);
-//         //     },
-            
-//         //   );
-     
-//     return (
-        
-//         <SafeAreaView style={{flex: 1}}>
-//         <WebView
-//             originWhitelist={['*']}
-//             source={{ html: html }}
-//             style={styles.map}
-//             javaScriptEnabled={true}
-//             domStorageEnabled={true}
-//             onMessage={(event) => {
-//                 console.log('WebView message:', event.nativeEvent.data);
-//             }}
-//             onError={(syntheticEvent) => {
-//                 const { nativeEvent } = syntheticEvent;
-//                 console.warn('WebView error: ', nativeEvent);
-//             }}
-//             onLoadEnd={(syntheticEvent) => {
-//                 const { nativeEvent } = syntheticEvent;
-//                 console.log('WebView loaded: ', nativeEvent);
-//             }}
-//         />
-//     </SafeAreaView>
-//     );
-// };
-
-// const styles = StyleSheet.create({
-//     container: {
-//       flex: 1,
-//       justifyContent: 'center',
-//       alignItems: 'center',
-//     },
-//     map: {
-//       flex: 1,
-//       width: width,
-//       height: height,
-//     },
-//   });
