@@ -8,132 +8,11 @@ import React, { useEffect, useRef, useState  } from 'react';
 import { SafeAreaView, StyleSheet, Dimensions, PermissionsAndroid, Platform,View,Text ,TouchableOpacity} from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 import { WebView } from 'react-native-webview';
-import config from '../util/apiKey.js';
+import {html} from '../util/apiKey.js';
 import { Picker } from '@react-native-picker/picker';
 import SQLite from 'react-native-sqlite-storage';
 SQLite.enablePromise(true);
 
-const { width, height } = Dimensions.get('window');
-
-const html = `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>카카오 맵</title>
-    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=${config.APIKEY_MAP}"></script>
-</head>
-<body>
-    <div id="map" style="width:${width-20}px;height:${height/2.8}px; border-radius:30px;"></div>
-    <script type="text/javascript">
-        let map = '';
-        let marker = '';
-
-        function initMap(lat, lng) {
-            var container = document.getElementById('map');
-            var options = { 
-                center: new kakao.maps.LatLng(lat, lng),
-                level: 3
-            };
-            
-            map = new kakao.maps.Map(container, options);
-
-            marker = new kakao.maps.Marker({
-                position: new kakao.maps.LatLng(lat, lng)
-            });
-            marker.setMap(map);
-
-            
-        }
-        async function setMarker(arrayData){
-
-          const tempData = arrayData.map(v => {
-              return {
-                title:  v.STOP_BY, 
-                latlng: new kakao.maps.LatLng(v.LATITUDE, v.LONGTITUDE)
-              }
-            })
-          
-          for(let i = 0; i < tempData.length; i++) {
-
-            marker = new kakao.maps.Marker({
-                map: map, 
-                position: tempData[i].latlng,
-                title : tempData[i].title,
-            });
-          }
-
-          const url = "https://apis-navi.kakaomobility.com/v1/waypoints/directions" ;
-
-          const origin = arrayData[0].LATITUDE+','+arrayData[0].LONGTITUDE; 
-          const destination = arrayData[arrayData.length - 1].LATITUDE+','+arrayData[arrayData.length - 1].LONGTITUDE;
-          
-
-          const headers = {
-            Authorization: "KakaoAK ${config.APIKEY_MAP}",
-            'Content-Type': 'application/json'
-          };
-          const queryParams = new URLSearchParams({
-                origin: origin,
-                destination: destination
-          });
-
-          const requestUrl = url+"?"+queryParams;
-
-          try {
-            const response = await fetch(requestUrl, {
-              method: 'GET',
-              headers: headers
-            });
-
-            if (!response.ok) {
-              
-            }
-
-            const data = await response.json();
-            const linePath = [];
-            data.routes[0].sections[0].roads.forEach(router => {
-              router.vertexes.forEach((vertex, index) => {
-                             
-                if (index % 2 === 0) {
-                  linePath.push(new kakao.maps.LatLng(router.vertexes[index + 1], router.vertexes[index]));
-                }
-              });
-            });
-            var polyline = new kakao.maps.Polyline({
-              path: linePath,
-              strokeWeight: 5,
-              strokeColor: '#000000',
-              strokeOpacity: 0.7,
-              strokeStyle: 'solid'
-            }); 
-            polyline.setMap(map);
-            console.log(data)
-          } catch (error) {
-            console.error('Error:', error);
-          }
-
-        }
-        function updatePosition(lat, lng) {
-        
-          
-          var moveLatLon = new kakao.maps.LatLng(lat, lng);
-          map.setCenter(moveLatLon);
-          marker.setPosition(moveLatLon);
-            
-        }
-
-
-
-        window.onload = function() {
-            
-            // initMap(33.450701, 126.570667); // 초기 위치 설정
-        }
-    </script>
-</body>
-</html>
-`;
 
 const requestLocationPermission = async () => {
   if (Platform.OS === 'android') {
@@ -341,7 +220,7 @@ export const MyLocation = () => {
       <WebView
         ref={webViewRef}
         originWhitelist={['*']}
-        source={{ html: html }}
+        source={{ html:html }}
         style={styles.map}
         javaScriptEnabled={true}
         domStorageEnabled={true}
@@ -360,13 +239,10 @@ export const MyLocation = () => {
             </View>
             <View style={{flex:1}}>
               <View style={styles.circle_blue}>
-              
               </View>
             </View>
-          
             <View style={{flex:1}}>
               <View style={styles.circle_oran}>
-            
               </View>
             </View>
           </View>
@@ -375,12 +251,11 @@ export const MyLocation = () => {
 
           </View>
             <View style={{flex:1}}>
-              {/* <Text style={styles.largeFont}>{start}</Text> */}
               <Picker
                 selectedValue={selectedStartLocation}
                 style={styles.middleFont}
                 onValueChange={(itemValue) => setSelectedStartLocation(itemValue)}
-            >
+              >
                 <Picker.Item label="Select Start Location" value="0" />
                 {uniqueStartLocations.map((item, index) => (
                     <Picker.Item key={index} label={item} value={item} />
