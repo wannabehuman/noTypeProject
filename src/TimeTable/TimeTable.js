@@ -6,20 +6,48 @@ import {
   StyleSheet,
   Switch,
   View,
+  Animated,
+  TouchableOpacity,
+  PanResponder,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useRef, useEffect, useState} from 'react';
 import SQLite from 'react-native-sqlite-storage';
 import {pickContext} from '../../App';
 import {SelectOption} from '../components/Util/SelectOption';
 SQLite.enablePromise(true);
 
 export const TimeTable = () => {
-  // 출발 및 도착 선택값 저장
   const {setPickLocation, setStOption, setEdOption, selectSt, selectEd} =
     React.useContext(pickContext);
 
   const [data, setData] = useState([]);
   const [isHappy, setIsHappy] = useState(true);
+  const heightAnim = useRef(new Animated.Value(0.3)).current; // 초기 높이 값 (30%)
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        return Math.abs(gestureState.dy) > 10; // 작은 움직임은 무시하고, 일정 크기 이상일 때만 응답
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        if (gestureState.dy > 0) {
+          // 아래로 스와이프 시 확장
+          Animated.timing(heightAnim, {
+            toValue: 0.9, // 확장된 높이 (90%)
+            duration: 300,
+            useNativeDriver: false,
+          }).start();
+        } else if (gestureState.dy < 0) {
+          // 위로 스와이프 시 축소
+          Animated.timing(heightAnim, {
+            toValue: 0.3, // 축소된 높이 (30%)
+            duration: 300,
+            useNativeDriver: false,
+          }).start();
+        }
+      },
+    }),
+  ).current;
 
   const getAllData = async () => {
     let db;
@@ -33,7 +61,6 @@ export const TimeTable = () => {
       console.log('데이터베이스 연결 성공');
 
       db.transaction(tx => {
-        // 출발지 및 도착지 목록 조회
         tx.executeSql(
           'SELECT DISTINCT START_LOCATION FROM realBusTime;',
           [],
@@ -134,9 +161,20 @@ export const TimeTable = () => {
   return (
     <SafeAreaView style={styles.container}>
       {/* 검색 창 */}
-      <SelectOption></SelectOption>
+      <Animated.View
+        style={[
+          styles.optionContainer,
+          {
+            height: heightAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: ['30%', '90%'], // 30%에서 90%로 높이 애니메이션
+            }),
+          },
+        ]}
+        {...panResponder.panHandlers}>
+        <SelectOption />
+      </Animated.View>
       {/* 결과 값 */}
-
       <View style={styles.scrollViewContainer}>
         <ScrollView style={styles.ScrollView}>
           <View style={styles.switchContainer}>
@@ -178,12 +216,20 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
   },
+  optionContainer: {
+    justifyContent: 'center',
+  },
+  toggleButton: {
+    textAlign: 'center',
+    padding: 10,
+    fontWeight: 'bold',
+  },
   scrollViewContainer: {
+    flex: 1,
     borderRadius: 10,
     backgroundColor: 'white',
-    minHeight: '100%',
     width: '100%',
-    marginTop: 30,
+    minHeight: '70%',
     padding: 30,
     paddingBottom: 100,
 
