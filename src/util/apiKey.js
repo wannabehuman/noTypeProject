@@ -1,7 +1,13 @@
 //카카오 맵 API
+<<<<<<< HEAD
 import {Dimensions} from 'react-native';
 const config = {APIKEY_MAP: '90fda858df222be3db38be2784b08668'};
 const {width, height} = Dimensions.get('window');
+=======
+import { Dimensions} from 'react-native';
+const config = {APIKEY_MAP : "90fda858df222be3db38be2784b08668"}
+const { width, height } = Dimensions.get('window');
+>>>>>>> e2cade9efa2cbaf3be1c0290e08307a174b59460
 
 const html = `
 <!DOCTYPE html>
@@ -10,6 +16,7 @@ const html = `
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>카카오 맵</title>
+<<<<<<< HEAD
     <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=${
       config.APIKEY_MAP
     }"></script>
@@ -18,6 +25,12 @@ const html = `
     <div id="map" style="width:${width - 20}px;height:${
   height / 2.8
 }px; border-radius:30px;"></div>
+=======
+    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=${config.APIKEY_MAP}"></script>
+</head>
+<body>
+    <div id="map" style="width:${width-20}px;height:${height/2.8}px; border-radius:30px;"></div>
+>>>>>>> e2cade9efa2cbaf3be1c0290e08307a174b59460
     <script type="text/javascript">
         let map = '';
         let marker = '';
@@ -127,4 +140,12 @@ const html = `
 </html>
 `;
 
+<<<<<<< HEAD
 export {config, html};
+=======
+
+
+
+
+export { config, html };
+>>>>>>> e2cade9efa2cbaf3be1c0290e08307a174b59460
