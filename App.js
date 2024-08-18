@@ -48,9 +48,9 @@ function App() {
           position => {
             const {latitude, longitude} = position.coords;
             if (webViewRef.current) {
-              webViewRef.current.injectJavaScript(
-                `initMap(${latitude}, ${longitude}); true;`,
-              );
+              // webViewRef.current.injectJavaScript(
+              //   `initMap(${latitude}, ${longitude}); true;`,
+              // );
             }
           },
           error => {
