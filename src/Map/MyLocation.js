@@ -212,44 +212,17 @@ export const MyLocation = () => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.top}>
-         <View style={[styles.topCard,styles.shadow_top]}></View>
-      </View>
-
-      <View style={styles.map}>
-      <WebView
-        ref={webViewRef}
-        originWhitelist={['*']}
-        source={{ html:html }}
-        style={styles.map}
-        javaScriptEnabled={true}
-        domStorageEnabled={true}
-        onError={(syntheticEvent) => {
-          const { nativeEvent } = syntheticEvent;
-          console.warn('WebView error: ', nativeEvent);
-        }}
-        onLoadEnd={handleWebViewLoad}
-      />
-      </View>
-      <View style={styles.info}>
-        <View style={[styles.leftItem, styles.shadow]}>
+        <View style={[styles.top, styles.shadow]}>
           <View style={styles.narrowBox}>
-            <View style={{flex:0.7}}>
-               <Text style={styles.largeFont}>나의 경로</Text>
+            <View style={{flex:1}}>
+              <View style={styles.circle_blue}></View>
             </View>
             <View style={{flex:1}}>
-              <View style={styles.circle_blue}>
-              </View>
-            </View>
-            <View style={{flex:1}}>
-              <View style={styles.circle_oran}>
-              </View>
+              <View style={styles.circle_oran}></View>
             </View>
           </View>
-          <View style={styles.widerBox}>
-          <View style={{flex:0.7}}>
-
-          </View>
+          <View style={styles.widerBox}>          
+            
             <View style={{flex:1}}>
               <Picker
                 selectedValue={selectedStartLocation}
@@ -278,28 +251,37 @@ export const MyLocation = () => {
             </View>
           </View>
         </View>
+
+      <View style={styles.map}>
+      <WebView
+        ref={webViewRef}
+        originWhitelist={['*']}
+        source={{ html:html }}
+        style={styles.map}
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        onError={(syntheticEvent) => {
+          const { nativeEvent } = syntheticEvent;
+          console.warn('WebView error: ', nativeEvent);
+        }}
+        onLoadEnd={handleWebViewLoad}
+      />
+      </View>
+      <View style={styles.info}>
         <View style={[styles.rightItem,styles.shadow]}>
           <View style={{flex:1}}>
             <Text style={styles.largeFont}>도착지 설정</Text>
           </View>
           <View style={{flex:2}}>
-            <Picker
-                selectedValue={selectedStartLocation}
-                style={styles.middleFont}
-                onValueChange={(itemValue) => setSelectedStartLocation(itemValue)}
-            >
-                <Picker.Item label="Select Start Location" value="0" />
-                {uniqueStartLocations.map((item, index) => (
-                    <Picker.Item key={index} label={item} value={item} />
-                ))}
-            </Picker>
+          
           </View>
           <View style={{flex:1}}>
-          <TouchableOpacity
+            <Text>도착지 설정</Text>
+          {/* <TouchableOpacity
             style={styles.button}
             onPress={() => navigation.navigate('Contact')}>
             <Text style={styles.buttonText}>알림 받기</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           </View>
         </View>
       </View>
@@ -316,7 +298,7 @@ const styles = StyleSheet.create({
   },
   middleFont:{
     fontSize:10,
-    width:160
+    width:500
   },
   innerCircle:{
     marginTop: 6,
@@ -327,7 +309,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white', // 동그라미의 배경색    
   },
   circle_blue: {
-    marginTop: 23.5,
+    marginTop: 23,
     marginLeft : 25,
     width: '25%', // 동그라미의 너비
     height: '10%', // 동그라미의 높이
@@ -335,7 +317,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'blue', // 동그라미의 배경색
   },
   circle_oran: {
-    marginTop: 23.5,
+    marginTop: 23,
     marginLeft : 25,
     width: '25%', // 동그라미의 너비
     height: '10%', // 동그라미의 높이
@@ -351,8 +333,10 @@ const styles = StyleSheet.create({
     // backgroundColor:"blue"
   },
   top:{
-    flex:0.5,
+    flex:1,
     backgroundColor: 'white',
+    flexDirection : 'row',
+
   },
   //상단 박스 스타일
   topCard:{
@@ -365,7 +349,7 @@ const styles = StyleSheet.create({
     flex:1.5
   },
   info:{
-    flex: 1,
+    flex: 1.3,
     width: '100%',
     backgroundColor: 'white',
     flexDirection : 'row',
@@ -412,13 +396,11 @@ const styles = StyleSheet.create({
   },
   
   map: {
-    flex: 1.2,
+    flex: 5.1,
     
   },
   button: {
     backgroundColor: '#47bf80', // 버튼 배경색상 추가
-    // paddingVertical: 15,
-    // paddingHorizontal: 30,
     borderRadius: 10,
     marginBottom: 20,
     width:'50%',
