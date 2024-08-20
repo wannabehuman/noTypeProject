@@ -16,13 +16,16 @@ import {pickContext} from '../../App';
 import {SelectOption} from '../components/Util/SelectOption';
 SQLite.enablePromise(true);
 
-export const TimeTable = () => {
+const {width, height} = Dimensions.get('window');
+
+export const TimeTable = ({navigation}) => {
   const {setPickLocation, setStOption, setEdOption, selectSt, selectEd} =
     React.useContext(pickContext);
 
   const [data, setData] = useState([]);
   const [isHappy, setIsHappy] = useState(true);
-  const heightAnim = useRef(new Animated.Value(0.3)).current; // 초기 높이 값 (30%)
+  const heightAnim = useRef(new Animated.Value(1 - 50 / height)).current; // 초기 높이 값 (30%)
+  console.log(1 - 50 / height);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -33,14 +36,14 @@ export const TimeTable = () => {
         if (gestureState.dy > 0) {
           // 아래로 스와이프 시 확장
           Animated.timing(heightAnim, {
-            toValue: 0.9, // 확장된 높이 (90%)
+            toValue: 1 - 50 / height, // 확장된 높이 (90%)
             duration: 300,
             useNativeDriver: false,
           }).start();
         } else if (gestureState.dy < 0) {
           // 위로 스와이프 시 축소
           Animated.timing(heightAnim, {
-            toValue: 0.3, // 축소된 높이 (30%)
+            toValue: 150 / height, // 축소된 높이 (30%)
             duration: 300,
             useNativeDriver: false,
           }).start();
@@ -167,7 +170,10 @@ export const TimeTable = () => {
           {
             height: heightAnim.interpolate({
               inputRange: [0, 1],
-              outputRange: ['30%', '90%'], // 30%에서 90%로 높이 애니메이션
+              outputRange: [
+                `${(150 / height) * 100}%`,
+                `${(1 - 50 / height) * 100}%`,
+              ], // 30%에서 90%로 높이 애니메이션
             }),
           },
         ]}
@@ -176,7 +182,6 @@ export const TimeTable = () => {
       </Animated.View>
       {/* 결과 값 */}
       <View style={styles.scrollViewContainer}>
-        <ScrollView style={styles.ScrollView}>
           <View style={styles.switchContainer}>
             <Text>{isHappy ? '퇴근' : '출근'}</Text>
             <Switch
@@ -184,18 +189,20 @@ export const TimeTable = () => {
               onValueChange={() => setIsHappy(previousState => !previousState)}
             />
           </View>
+        <ScrollView style={styles.ScrollView}>
           {data.length > 0 ? (
             <View>
               {data.map((item, index) => (
                 <Text
                   key={index}
                   style={styles.itemText}
-                  onPress={() =>
+                  onPress={() => {
                     setPickLocation({
                       st: item.START_LOCATION,
                       ed: item.END_LOCATION,
-                    })
-                  }>
+                    });
+                    navigation.navigate('나의 위치');
+                  }}>
                   GUBUN: {item.GUBUN}, TIMES: {item.TIMES}, INDEX: {item.INDEX},
                   MY_LOCATION: {item.MY_LOCATION}, END_LOCATION:{' '}
                   {item.END_LOCATION}, START_LOCATION: {item.START_LOCATION}
@@ -219,18 +226,14 @@ const styles = StyleSheet.create({
   optionContainer: {
     justifyContent: 'center',
   },
-  toggleButton: {
-    textAlign: 'center',
-    padding: 10,
-    fontWeight: 'bold',
-  },
   scrollViewContainer: {
     flex: 1,
     borderRadius: 10,
     backgroundColor: 'white',
     width: '100%',
-    minHeight: '70%',
+    minHeight: height - 150,
     padding: 30,
+    paddingTop: height * 0.2,
     paddingBottom: 100,
 
     shadowColor: '#000',
@@ -238,12 +241,17 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowRadius: 5,
     elevation: 5,
+    position: 'relative',
   },
   switchContainer: {
+    position: 'absolute',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginVertical: 10,
+    width: '100%',
+    paddingLeft: 10,
+    margin: 30,
+    marginTop: 20,
   },
   itemText: {
     padding: 10,
