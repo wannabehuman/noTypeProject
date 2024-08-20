@@ -9,6 +9,7 @@ import React, {createContext, useState, useEffect} from 'react';
 // import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {NavigationContainer} from '@react-navigation/native';
 import BottomTabs from './src/components/Footer/BottomTab';
+import SplashScreen from 'react-native-splash-screen';
 
 export const pickContext = createContext();
 
@@ -35,7 +36,15 @@ function App() {
   useEffect(() => {
     CheckPermission();
   }, []);
-
+  useEffect(() => {
+    try {
+      setTimeout(() => {
+        SplashScreen.hide();
+      }, 2000); //스플래시 활성화 시간 2초
+    } catch (e) {
+      console.log(e.message);
+    }
+  });
   useEffect(() => {
     console.log('Current pickLocation:', pickLocation);
   }, [pickLocation]);

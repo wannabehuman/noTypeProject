@@ -65,13 +65,13 @@ export const TimeTable = ({navigation}) => {
 
       db.transaction(tx => {
         tx.executeSql(
-          'SELECT DISTINCT START_LOCATION FROM realBusTime;',
+          'SELECT DISTINCT BS.STOP_NM AS STOP_NM FROM realBusTime AS TI INNER JOIN baseCode as BS ON TI.START_LOCATION = BS.STOP_CD;',
           [],
           (tx, results) => {
             const rows = results.rows;
             let startLocations = [];
             for (let i = 0; i < rows.length; i++) {
-              startLocations.push(rows.item(i).START_LOCATION);
+              startLocations.push(rows.item(i).STOP_NM);
             }
             setStOption(startLocations);
           },
@@ -81,13 +81,13 @@ export const TimeTable = ({navigation}) => {
         );
 
         tx.executeSql(
-          'SELECT DISTINCT END_LOCATION FROM realBusTime;',
+          'SELECT DISTINCT BS.STOP_NM AS STOP_NM FROM realBusTime AS TI INNER JOIN baseCode as BS ON TI.END_LOCATION = BS.STOP_CD;',
           [],
           (tx, results) => {
             const rows = results.rows;
             let endLocations = [];
             for (let i = 0; i < rows.length; i++) {
-              endLocations.push(rows.item(i).END_LOCATION);
+              endLocations.push(rows.item(i).STOP_NM);
             }
             setEdOption(endLocations);
           },
@@ -111,16 +111,19 @@ export const TimeTable = ({navigation}) => {
       });
 
       db.transaction(tx => {
-        let query = 'SELECT * FROM realBusTime WHERE 1=1';
+        let query =
+          'SELECT (SELECT STOP_NM FROM baseCode WHERE STOP_CD = START_LOCATION) AS START_LOCATION,  (SELECT STOP_NM FROM baseCode WHERE STOP_CD = END_LOCATION) AS END_LOCATION,TIMES FROM realBusTime WHERE 1=1';
         const params = [];
 
         if (startLocation) {
-          query += ' AND START_LOCATION = ?';
+          query +=
+            ' AND START_LOCATION = (SELECT STOP_CD FROM baseCode WHERE STOP_NM = ?)';
           params.push(startLocation);
         }
 
         if (endLocation) {
-          query += ' AND END_LOCATION = ?';
+          query +=
+            ' AND END_LOCATION = (SELECT STOP_CD FROM baseCode WHERE STOP_NM = ?)';
           params.push(endLocation);
         }
         if (gubun) {

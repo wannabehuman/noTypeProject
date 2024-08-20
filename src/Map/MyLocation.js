@@ -5,10 +5,11 @@
 
 
 import React, { useEffect, useRef, useState  } from 'react';
-import { SafeAreaView, StyleSheet, Dimensions, PermissionsAndroid, Platform,View,Text ,TouchableOpacity} from 'react-native';
+import { SafeAreaView, StyleSheet, Dimensions, PermissionsAndroid, Platform,View,Text ,TouchableOpacity,PanResponder,Animated,} from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 import { WebView } from 'react-native-webview';
 import {html} from '../util/apiKey.js';
+import {SelectOption} from '../components/Util/SelectOption';
 import { Picker } from '@react-native-picker/picker';
 import SQLite from 'react-native-sqlite-storage';
 SQLite.enablePromise(true);
@@ -43,7 +44,7 @@ export const MyLocation = () => {
     const [uniqueEndLocations, setUniqueEndLocations] = useState([]);
     const [selectedEndLocation, setSelectedEndLocation] = useState('');
     const [selectedStartLocation, setSelectedStartLocation] = useState('');
-
+    const heightAnim = useRef(new Animated.Value(0.15)).current; // 초기 높이 값 (30%)
     const getAllData = async () => {
         let db;
         try {
@@ -60,13 +61,13 @@ export const MyLocation = () => {
             db.transaction(tx => {
                 // 출발지 및 도착지 목록 조회
                 tx.executeSql(
-                    'SELECT DISTINCT START_LOCATION FROM realBusTime;',
+                  'SELECT DISTINCT BS.STOP_NM AS STOP_NM FROM realBusTime AS TI INNER JOIN baseCode as BS ON TI.START_LOCATION = BS.STOP_CD;',
                     [],
                     (tx, results) => {
                         const rows = results.rows;
                         let startLocations = [];
                         for (let i = 0; i < rows.length; i++) {
-                            startLocations.push(rows.item(i).START_LOCATION);
+                            startLocations.push(rows.item(i).STOP_NM);
                         }
                         setUniqueStartLocations(startLocations);
                     },
@@ -76,13 +77,13 @@ export const MyLocation = () => {
                 );
 
                 tx.executeSql(
-                    'SELECT DISTINCT END_LOCATION FROM realBusTime;',
+                  'SELECT DISTINCT BS.STOP_NM AS STOP_NM FROM realBusTime AS TI INNER JOIN baseCode as BS ON TI.END_LOCATION = BS.STOP_CD;',
                     [],
                     (tx, results) => {
                         const rows = results.rows;
                         let endLocations = [];
                         for (let i = 0; i < rows.length; i++) {
-                            endLocations.push(rows.item(i).END_LOCATION);
+                            endLocations.push(rows.item(i).STOP_NM);
                         }
                         setUniqueEndLocations(endLocations);
                     },
@@ -209,14 +210,75 @@ export const MyLocation = () => {
       { enableHighAccuracy: true }
     );
   };
-
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        return Math.abs(gestureState.dy) > 10; // 작은 움직임은 무시하고, 일정 크기 이상일 때만 응답
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        if (gestureState.dy < 0) {
+          // 아래로 스와이프 시 확장
+          Animated.timing(heightAnim, {
+            toValue: 0.9, // 확장된 높이 (90%)
+            duration: 300,
+            useNativeDriver: false,
+          }).start();
+        } else if (gestureState.dy > 0) {
+          // 위로 스와이프 시 축소
+          Animated.timing(heightAnim, {
+            toValue: 0.3, // 축소된 높이 (30%)
+            duration: 300,
+            useNativeDriver: false,
+          }).start();
+        }
+      },
+    }),
+  ).current;
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.top}>
-         <View style={[styles.topCard,styles.shadow_top]}></View>
-      </View>
+      
+        <View style={[styles.top, styles.shadow]}>
+          <View style={styles.narrowBox}>
+            <View style={{flex:1}}>
+              <View style={styles.circle_blue}></View>
+            </View>
+            <View style={{flex:1}}>
+              <View style={styles.circle_oran}></View>
+            </View>
+          </View>
+          <View style={styles.widerBox}>          
+            
+            <View style={{flex:1}}>
+              <Picker
+                selectedValue={selectedStartLocation}
+                style={styles.middleFont}
+                onValueChange={(itemValue) => setSelectedStartLocation(itemValue)}
+              >
+                <Picker.Item label="출발지 선택" value="0" />
+                {uniqueStartLocations.map((item, index) => (
+                    <Picker.Item key={index} label={item} value={item} />
+                ))}
+            </Picker>
+            </View>
+            
+            <View style={{flex:1}}>
+             
+              <Picker
+                selectedValue={selectedEndLocation}
+                style={styles.middleFont}
+                onValueChange={(itemValue) => setSelectedEndLocation(itemValue)}
+            >
+                <Picker.Item label="도착지 선택" value="0" />
+                {uniqueEndLocations.map((item, index) => (
+                    <Picker.Item key={index} label={item} value={item} />
+                ))}
+            </Picker>
+            </View>
+          </View>
+        </View>
 
       <View style={styles.map}>
+      
       <WebView
         ref={webViewRef}
         originWhitelist={['*']}
@@ -231,83 +293,40 @@ export const MyLocation = () => {
         onLoadEnd={handleWebViewLoad}
       />
       </View>
-      <View style={styles.info}>
-        <View style={[styles.leftItem, styles.shadow]}>
-          <View style={styles.narrowBox}>
-            <View style={{flex:0.7}}>
-               <Text style={styles.largeFont}>나의 경로</Text>
-            </View>
-            <View style={{flex:1}}>
-              <View style={styles.circle_blue}>
-              </View>
-            </View>
-            <View style={{flex:1}}>
-              <View style={styles.circle_oran}>
-              </View>
+      <Animated.View
+        style={[
+          styles.optionContainer,
+          {
+            height: heightAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: ['-20%', '90%'], // 30%에서 90%로 높이 애니메이션
+            }),
+          },
+        ]}
+        {...panResponder.panHandlers}>
+        <View style={styles.info}>
+          <View style={[styles.bottomItem,styles.shadow]}>
+            <View style={styles.bottomText}>
+              <Text>경로 확인하기</Text>
+            {/* <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate('Contact')}>
+              <Text style={styles.buttonText}>알림 받기</Text>
+            </TouchableOpacity> */}
             </View>
           </View>
-          <View style={styles.widerBox}>
-          <View style={{flex:0.7}}>
+        </View>
 
-          </View>
-            <View style={{flex:1}}>
-              <Picker
-                selectedValue={selectedStartLocation}
-                style={styles.middleFont}
-                onValueChange={(itemValue) => setSelectedStartLocation(itemValue)}
-              >
-                <Picker.Item label="Select Start Location" value="0" />
-                {uniqueStartLocations.map((item, index) => (
-                    <Picker.Item key={index} label={item} value={item} />
-                ))}
-            </Picker>
-            </View>
-            
-            <View style={{flex:1}}>
-             
-              <Picker
-                selectedValue={selectedEndLocation}
-                style={styles.middleFont}
-                onValueChange={(itemValue) => setSelectedEndLocation(itemValue)}
-            >
-                <Picker.Item label="Select End Location" value="0" />
-                {uniqueEndLocations.map((item, index) => (
-                    <Picker.Item key={index} label={item} value={item} />
-                ))}
-            </Picker>
-            </View>
-          </View>
-        </View>
-        <View style={[styles.rightItem,styles.shadow]}>
-          <View style={{flex:1}}>
-            <Text style={styles.largeFont}>도착지 설정</Text>
-          </View>
-          <View style={{flex:2}}>
-            <Picker
-                selectedValue={selectedStartLocation}
-                style={styles.middleFont}
-                onValueChange={(itemValue) => setSelectedStartLocation(itemValue)}
-            >
-                <Picker.Item label="Select Start Location" value="0" />
-                {uniqueStartLocations.map((item, index) => (
-                    <Picker.Item key={index} label={item} value={item} />
-                ))}
-            </Picker>
-          </View>
-          <View style={{flex:1}}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate('Contact')}>
-            <Text style={styles.buttonText}>알림 받기</Text>
-          </TouchableOpacity>
-          </View>
-        </View>
-      </View>
+      </Animated.View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  bottomText:{
+    marginTop: 15,
+    alignItems: 'center'
+  },
   largeFont:{
     marginTop:15,
     marginLeft:25,
@@ -316,7 +335,7 @@ const styles = StyleSheet.create({
   },
   middleFont:{
     fontSize:10,
-    width:160
+    width:500
   },
   innerCircle:{
     marginTop: 6,
@@ -327,7 +346,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white', // 동그라미의 배경색    
   },
   circle_blue: {
-    marginTop: 23.5,
+    marginTop: 23,
     marginLeft : 25,
     width: '25%', // 동그라미의 너비
     height: '10%', // 동그라미의 높이
@@ -335,7 +354,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'blue', // 동그라미의 배경색
   },
   circle_oran: {
-    marginTop: 23.5,
+    marginTop: 23,
     marginLeft : 25,
     width: '25%', // 동그라미의 너비
     height: '10%', // 동그라미의 높이
@@ -351,8 +370,10 @@ const styles = StyleSheet.create({
     // backgroundColor:"blue"
   },
   top:{
-    flex:0.5,
+    flex:2.2,
     backgroundColor: 'white',
+    flexDirection : 'row',
+
   },
   //상단 박스 스타일
   topCard:{
@@ -362,10 +383,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginLeft:10,
     marginRight:10,
-    flex:1.5
+    flex:2.0
   },
   info:{
-    flex: 1,
+    flex: 1.0,
     width: '100%',
     backgroundColor: 'white',
     flexDirection : 'row',
@@ -401,24 +422,22 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 2, height: 2},
     elevation: 6,
   },
-  rightItem:{
+  bottomItem:{
     borderRadius: 30,
-    marginTop: 40,
+    marginTop: 20,
     marginRight:10,
     marginLeft:5,
     flex: 1,
-    height: '70%', 
+    height: '50%', 
     flexDirection : 'column'
   },
   
   map: {
-    flex: 1.2,
+    flex: 8.1,
     
   },
   button: {
     backgroundColor: '#47bf80', // 버튼 배경색상 추가
-    // paddingVertical: 15,
-    // paddingHorizontal: 30,
     borderRadius: 10,
     marginBottom: 20,
     width:'50%',
