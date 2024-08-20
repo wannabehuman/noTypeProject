@@ -182,13 +182,13 @@ export const TimeTable = ({navigation}) => {
       </Animated.View>
       {/* 결과 값 */}
       <View style={styles.scrollViewContainer}>
-          <View style={styles.switchContainer}>
-            <Text>{isHappy ? '퇴근' : '출근'}</Text>
-            <Switch
-              value={isHappy}
-              onValueChange={() => setIsHappy(previousState => !previousState)}
-            />
-          </View>
+        <View style={styles.switchContainer}>
+          <Text>{isHappy ? '퇴근' : '출근'}</Text>
+          <Switch
+            value={isHappy}
+            onValueChange={() => setIsHappy(previousState => !previousState)}
+          />
+        </View>
         <ScrollView style={styles.ScrollView}>
           {data.length > 0 ? (
             <View>
