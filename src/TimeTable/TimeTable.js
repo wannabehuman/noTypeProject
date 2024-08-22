@@ -14,6 +14,7 @@ import React, {useRef, useEffect, useState} from 'react';
 import SQLite from 'react-native-sqlite-storage';
 import {pickContext} from '../../App';
 import {SelectOption} from '../components/Util/SelectOption';
+import Icon from 'react-native-vector-icons/Entypo';
 SQLite.enablePromise(true);
 
 const {width, height} = Dimensions.get('window');
@@ -186,17 +187,24 @@ export const TimeTable = ({navigation}) => {
       {/* 결과 값 */}
       <View style={styles.scrollViewContainer}>
         <View style={styles.switchContainer}>
-          <Text>{isHappy ? '퇴근' : '출근'}</Text>
+          <View style={styles.textContainer}>
+            <Icon
+              name={isHappy ? 'moon' : 'light-up'}
+              size={22}
+              color="#47bf80"
+            />
+            <Text>{isHappy ? '퇴근' : '출근'}</Text>
+          </View>
           <Switch
             value={isHappy}
             onValueChange={() => setIsHappy(previousState => !previousState)}
           />
         </View>
-        <ScrollView style={styles.ScrollView}>
+        <ScrollView>
           {data.length > 0 ? (
-            <View>
+            <View style={styles.scrollView}>
               {data.map((item, index) => (
-                <Text
+                <View
                   key={index}
                   style={styles.itemText}
                   onPress={() => {
@@ -206,10 +214,14 @@ export const TimeTable = ({navigation}) => {
                     });
                     navigation.navigate('나의 위치');
                   }}>
-                  GUBUN: {item.GUBUN}, TIMES: {item.TIMES}, INDEX: {item.INDEX},
-                  MY_LOCATION: {item.MY_LOCATION}, END_LOCATION:{' '}
-                  {item.END_LOCATION}, START_LOCATION: {item.START_LOCATION}
-                </Text>
+                  <View style={styles.pathTextContainer}>
+                    <Text style={styles.pathText}>
+                      {item.END_LOCATION}-{item.START_LOCATION}
+                    </Text>
+                  </View>
+
+                  <Text style={styles.timeText}>{item.TIMES}</Text>
+                </View>
               ))}
             </View>
           ) : (
@@ -225,6 +237,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
+    backgroundColor: '#47bf80',
   },
   optionContainer: {
     justifyContent: 'center',
@@ -236,8 +249,8 @@ const styles = StyleSheet.create({
     width: '100%',
     minHeight: height - 150,
     padding: 30,
-    paddingTop: height * 0.2,
-    paddingBottom: 100,
+    paddingTop: height * 0.1,
+    paddingBottom: 200,
 
     shadowColor: '#000',
     shadowOpacity: 0.1,
@@ -252,14 +265,59 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    paddingLeft: 10,
+    paddingLeft: 0,
     margin: 30,
     marginTop: 20,
   },
+  textContainer: {
+    width: 60,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  scrollView: {
+    borderTopWidth: 1.5,
+    borderColor: '#ccc',
+  },
   itemText: {
+    alignItems: 'baseline',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
+  },
+  pathTextContainer: {
+    width: '60%',
+    alignItems: 'baseline',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    padding: 3,
+    borderRightWidth: 1,
+    borderColor: '#ccc',
+  },
+  pathText: {
+    fontSize: 13,
+    backgroundColor: '#f17b00',
+    color: 'white',
+    paddingLeft: 5,
+    paddingRight: 5,
+    paddingTop: 3,
+    paddingBottom: 3,
+
+    fontWeight: '500',
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    borderRadius: 5,
+  },
+  timeText: {
+    width: '40%',
+    fontSize: 20,
+    fontWeight: '700',
+    paddingLeft: 5,
+    paddingTop: 3,
+    paddingBottom: 3,
+    textAlignVertical: 'center',
+    textAlign: 'center',
   },
   loadingText: {
     padding: 10,
