@@ -11,6 +11,7 @@ import { WebView } from 'react-native-webview';
 import {html} from '../util/apiKey.js';
 import {SelectOption} from '../components/Util/SelectOption';
 import { Picker } from '@react-native-picker/picker';
+import PassLocation from '../components/Util/PassLocation';
 import SQLite from 'react-native-sqlite-storage';
 SQLite.enablePromise(true);
 
@@ -21,11 +22,11 @@ const requestLocationPermission = async () => {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         {
-          title: 'Location Permission',
-          message: 'We need access to your location to show your position on the map',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
+          title: '위치 권한',
+          message: '지도에서 자신의 위치를 확인하기 위해서는 위치 권한이 필요합니다',
+          buttonNeutral: '나중에 묻기',
+          buttonNegative: '아니오',
+          buttonPositive: '예',
         },
       );
       return granted === PermissionsAndroid.RESULTS.GRANTED;
@@ -98,7 +99,9 @@ export const MyLocation = () => {
         }
     };
 
+  
     const fetchFilteredData = async (startLocation, endLocation) => {
+  
         let db;
         try {
             db = await SQLite.openDatabase(
@@ -110,35 +113,37 @@ export const MyLocation = () => {
             );
 
             db.transaction(tx => {
-                let query = 'SELECT LONGTITUDE, LATITUDE, ST.STOP_BY ,ST.SEQ FROM lati_lonti AS WI INNER JOIN realStopBy AS ST ON ST.STOP_BY = WI.STOP_BY_CD WHERE 1=1';
+                let query = 'SELECT BS.STOP_NM,LONGTITUDE, LATITUDE, ST.STOP_BY ,ST.SEQ FROM lati_lonti AS WI INNER JOIN realStopBy AS ST ON ST.STOP_BY = WI.STOP_BY_CD INNER JOIN baseCode AS BS ON BS.STOP_CD = ST.STOP_BY WHERE 1=1';
                 const params = [];
 
                 if (startLocation) {
-                    query += ' AND START_LOCATION = ?';
+                    query += ' AND START_LOCATION = (SELECT STOP_CD FROM baseCode WHERE STOP_NM = ?)';
                     params.push(startLocation);
                 }
 
                 if (endLocation) {
-                    query += ' AND END_LOCATION = ?';
+                    query += ' AND END_LOCATION = (SELECT STOP_CD FROM baseCode WHERE STOP_NM = ?)';
                     params.push(endLocation);
-                }
-                
-
-                tx.executeSql(
+                          
+                  }
+                  tx.executeSql(
                     query,
                     params,
                     (tx, results) => {
-                        const rows = results.rows;
-                        let items = [];
-                        for (let i = 0; i < rows.length; i++) {
-                            items.push(rows.item(i));
-                        }
-                        setData(items);
+                      
+                      const rows = results.rows;
+                      let items = [];
+                      for (let i = 0; i < rows.length; i++) {
+                        items.push(rows.item(i));
+
+                      }
+                      setData(items);
                     },
                     error => {
-                        console.log('필터링된 데이터 조회 에러:', error);
+                      console.log('필터링된 데이터 조회 에러:', error);
                     }
-                );
+                  );
+                
             });
 
         } catch (error) {
@@ -153,8 +158,9 @@ export const MyLocation = () => {
     }, []);
 
     useEffect(() => {
-        fetchFilteredData(selectedStartLocation !== "0" ? selectedStartLocation : "", selectedEndLocation !== "0" ? selectedEndLocation : "");
         
+        fetchFilteredData(selectedStartLocation !== "0" ? selectedStartLocation : "", selectedEndLocation !== "0" ? selectedEndLocation : "");
+        // passData(selectedStartLocation !== "0" ? selectedStartLocation : "", selectedEndLocation !== "0" ? selectedEndLocation : "");
     }, [selectedStartLocation, selectedEndLocation]);
 
       useEffect(() => {
@@ -226,7 +232,7 @@ export const MyLocation = () => {
         } else if (gestureState.dy > 0) {
           // 위로 스와이프 시 축소
           Animated.timing(heightAnim, {
-            toValue: 0.3, // 축소된 높이 (30%)
+            toValue: 0.15, // 축소된 높이 (30%)
             duration: 300,
             useNativeDriver: false,
           }).start();
@@ -234,6 +240,17 @@ export const MyLocation = () => {
       },
     }),
   ).current;
+
+  let pData;
+  if(data.length>25){
+    
+  }else{
+    pData = data.map(v=>{
+  
+      return v.STOP_NM
+    })
+
+  }
   return (
     <SafeAreaView style={{ flex: 1 }}>
       
@@ -295,11 +312,10 @@ export const MyLocation = () => {
       </View>
       <Animated.View
         style={[
-          styles.optionContainer,
           {
             height: heightAnim.interpolate({
               inputRange: [0, 1],
-              outputRange: ['-20%', '90%'], // 30%에서 90%로 높이 애니메이션
+              outputRange: ['0%', '90%'], // 30%에서 90%로 높이 애니메이션
             }),
           },
         ]}
@@ -308,12 +324,14 @@ export const MyLocation = () => {
           <View style={[styles.bottomItem,styles.shadow]}>
             <View style={styles.bottomText}>
               <Text>경로 확인하기</Text>
+              {/* <Text>{pData}</Text> */}
             {/* <TouchableOpacity
               style={styles.button}
               onPress={() => navigation.navigate('Contact')}>
               <Text style={styles.buttonText}>알림 받기</Text>
             </TouchableOpacity> */}
             </View>
+            <PassLocation data={pData} />
           </View>
         </View>
 

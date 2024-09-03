@@ -52,55 +52,7 @@ const html = `
             });
           }
 
-          const url = "https://apis-navi.kakaomobility.com/v1/waypoints/directions" ;
-
-          const origin = arrayData[0].LATITUDE+','+arrayData[0].LONGTITUDE; 
-          const destination = arrayData[arrayData.length - 1].LATITUDE+','+arrayData[arrayData.length - 1].LONGTITUDE;
-          
-
-          const headers = {
-            Authorization: "KakaoAK ${config.APIKEY_MAP}",
-            'Content-Type': 'application/json'
-          };
-          const queryParams = new URLSearchParams({
-                origin: origin,
-                destination: destination
-          });
-
-          const requestUrl = url+"?"+queryParams;
-
-          try {
-            const response = await fetch(requestUrl, {
-              method: 'GET',
-              headers: headers
-            });
-
-            if (!response.ok) {
-              
-            }
-
-            const data = await response.json();
-            const linePath = [];
-            data.routes[0].sections[0].roads.forEach(router => {
-              router.vertexes.forEach((vertex, index) => {
-                             
-                if (index % 2 === 0) {
-                  linePath.push(new kakao.maps.LatLng(router.vertexes[index + 1], router.vertexes[index]));
-                }
-              });
-            });
-            var polyline = new kakao.maps.Polyline({
-              path: linePath,
-              strokeWeight: 5,
-              strokeColor: '#000000',
-              strokeOpacity: 0.7,
-              strokeStyle: 'solid'
-            }); 
-            polyline.setMap(map);
-            console.log(data)
-          } catch (error) {
-            console.error('Error:', error);
-          }
+        
 
         }
         function updatePosition(lat, lng) {

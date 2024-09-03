@@ -104,6 +104,7 @@ export const TimeTable = ({navigation}) => {
 
   const fetchFilteredData = async (startLocation, endLocation, gubun) => {
     let db;
+
     try {
       db = await SQLite.openDatabase({
         name: 'realBusTable.db',
