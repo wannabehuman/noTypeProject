@@ -13,7 +13,7 @@ const html = `
     <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=${config.APIKEY_MAP}"></script>
 </head>
 <body>
-    <div id="map" style="width:${width-20}px;height:${height/1.7}px; border-radius:30px;"></div>
+    <div id="map" style="width:${width-20}px;height:${height-420}px; border-radius:30px;"></div>
     <script type="text/javascript">
         let map = '';
         let marker = '';

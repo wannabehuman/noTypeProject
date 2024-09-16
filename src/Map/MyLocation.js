@@ -10,7 +10,7 @@ import Geolocation from 'react-native-geolocation-service';
 import { WebView } from 'react-native-webview';
 import {html} from '../util/apiKey.js';
 import {SelectOption} from '../components/Util/SelectOption';
-import { Picker } from '@react-native-picker/picker';
+import {pickContext} from '../../App';
 import PassLocation from '../components/Util/PassLocation';
 import SQLite from 'react-native-sqlite-storage';
 SQLite.enablePromise(true);
@@ -39,12 +39,9 @@ const requestLocationPermission = async () => {
 };
 export const MyLocation = () => {
     const webViewRef = useRef(null);
-
+    const {setPickLocation, setStOption, setEdOption, selectSt, selectEd} =
+    React.useContext(pickContext);
     const [data, setData] = useState([]);
-    const [uniqueStartLocations, setUniqueStartLocations] = useState([]);
-    const [uniqueEndLocations, setUniqueEndLocations] = useState([]);
-    const [selectedEndLocation, setSelectedEndLocation] = useState('');
-    const [selectedStartLocation, setSelectedStartLocation] = useState('');
     const heightAnim = useRef(new Animated.Value(0.15)).current; // 초기 높이 값 (30%)
     const getAllData = async () => {
         let db;
@@ -70,7 +67,7 @@ export const MyLocation = () => {
                         for (let i = 0; i < rows.length; i++) {
                             startLocations.push(rows.item(i).STOP_NM);
                         }
-                        setUniqueStartLocations(startLocations);
+                        setStOption(startLocations);
                     },
                     error => {
                         console.log('출발지 조회 에러:', error);
@@ -86,7 +83,7 @@ export const MyLocation = () => {
                         for (let i = 0; i < rows.length; i++) {
                             endLocations.push(rows.item(i).STOP_NM);
                         }
-                        setUniqueEndLocations(endLocations);
+                        setEdOption(endLocations);
                     },
                     error => {
                         console.log('도착지 조회 에러:', error);
@@ -113,36 +110,38 @@ export const MyLocation = () => {
             );
 
             db.transaction(tx => {
-                let query = 'SELECT BS.STOP_NM,LONGTITUDE, LATITUDE, ST.STOP_BY ,ST.SEQ FROM lati_lonti AS WI INNER JOIN realStopBy AS ST ON ST.STOP_BY = WI.STOP_BY_CD INNER JOIN baseCode AS BS ON BS.STOP_CD = ST.STOP_BY WHERE 1=1';
+                let query = 'SELECT BS.STOP_NM,LONGTITUDE, LATITUDE, ST.STOP_BY ,ST.SEQ FROM lati_lonti AS WI LEFT JOIN realStopBy AS ST ON ST.STOP_BY = WI.STOP_BY_CD INNER JOIN baseCode AS BS ON BS.STOP_CD = ST.STOP_BY WHERE 1=1';
                 const params = [];
 
                 if (startLocation) {
+           
                     query += ' AND START_LOCATION = (SELECT STOP_CD FROM baseCode WHERE STOP_NM = ?)';
                     params.push(startLocation);
                 }
 
                 if (endLocation) {
+               
                     query += ' AND END_LOCATION = (SELECT STOP_CD FROM baseCode WHERE STOP_NM = ?)';
                     params.push(endLocation);
                           
-                  }
-                  tx.executeSql(
-                    query,
-                    params,
-                    (tx, results) => {
-                      
-                      const rows = results.rows;
-                      let items = [];
-                      for (let i = 0; i < rows.length; i++) {
-                        items.push(rows.item(i));
-
+                    tx.executeSql(
+                      query,
+                      params,
+                      (tx, results) => {
+                        
+                        const rows = results.rows;
+                        let items = [];
+                        for (let i = 0; i < rows.length; i++) {
+                          items.push(rows.item(i));
+                          
+                        }
+                        setData(items);
+                      },
+                      error => {
+                        console.log('필터링된 데이터 조회 에러:', error);
                       }
-                      setData(items);
-                    },
-                    error => {
-                      console.log('필터링된 데이터 조회 에러:', error);
-                    }
-                  );
+                    );
+                  }
                 
             });
 
@@ -159,9 +158,8 @@ export const MyLocation = () => {
 
     useEffect(() => {
         
-        fetchFilteredData(selectedStartLocation !== "0" ? selectedStartLocation : "", selectedEndLocation !== "0" ? selectedEndLocation : "");
-        // passData(selectedStartLocation !== "0" ? selectedStartLocation : "", selectedEndLocation !== "0" ? selectedEndLocation : "");
-    }, [selectedStartLocation, selectedEndLocation]);
+        fetchFilteredData(selectSt !== "0" ? selectSt : "", selectEd !== "0" ? selectEd : "");
+    }, [selectSt, selectEd]);
 
       useEffect(() => {
         if (data.length > 0) {
@@ -242,101 +240,66 @@ export const MyLocation = () => {
   ).current;
 
   let pData;
-  if(data.length>25){
-    
+  
+  if(data.length>32){
+    pData =""
   }else{
     pData = data.map(v=>{
   
       return v.STOP_NM
     })
-
   }
   return (
     <SafeAreaView style={{ flex: 1 }}>
       
-        <View style={[styles.top, styles.shadow]}>
-          <View style={styles.narrowBox}>
-            <View style={{flex:1}}>
-              <View style={styles.circle_blue}></View>
-            </View>
-            <View style={{flex:1}}>
-              <View style={styles.circle_oran}></View>
-            </View>
-          </View>
-          <View style={styles.widerBox}>          
-            
-            <View style={{flex:1}}>
-              <Picker
-                selectedValue={selectedStartLocation}
-                style={styles.middleFont}
-                onValueChange={(itemValue) => setSelectedStartLocation(itemValue)}
-              >
-                <Picker.Item label="출발지 선택" value="0" />
-                {uniqueStartLocations.map((item, index) => (
-                    <Picker.Item key={index} label={item} value={item} />
-                ))}
-            </Picker>
-            </View>
-            
-            <View style={{flex:1}}>
-             
-              <Picker
-                selectedValue={selectedEndLocation}
-                style={styles.middleFont}
-                onValueChange={(itemValue) => setSelectedEndLocation(itemValue)}
-            >
-                <Picker.Item label="도착지 선택" value="0" />
-                {uniqueEndLocations.map((item, index) => (
-                    <Picker.Item key={index} label={item} value={item} />
-                ))}
-            </Picker>
-            </View>
-          </View>
-        </View>
-
-      <View style={styles.map}>
-      
-      <WebView
-        ref={webViewRef}
-        originWhitelist={['*']}
-        source={{ html:html }}
-        style={styles.map}
-        javaScriptEnabled={true}
-        domStorageEnabled={true}
-        onError={(syntheticEvent) => {
-          const { nativeEvent } = syntheticEvent;
-          console.warn('WebView error: ', nativeEvent);
-        }}
-        onLoadEnd={handleWebViewLoad}
-      />
+      <View style={[styles.top, styles.shadow]}>
+        <SelectOption />
       </View>
-      <Animated.View
-        style={[
-          {
-            height: heightAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: ['0%', '90%'], // 30%에서 90%로 높이 애니메이션
+      <View style={styles.map}>
+        <WebView
+          ref={webViewRef}
+          originWhitelist={['*']}
+          source={{ html:html }}
+          style={styles.map}
+          javaScriptEnabled={true}
+          domStorageEnabled={true}
+          onError={(syntheticEvent) => {
+            const { nativeEvent } = syntheticEvent;
+            console.warn('WebView error: ', nativeEvent);
+          }}
+          onLoadEnd={handleWebViewLoad}
+        />
+      </View>
+      <Animated.View style={[{
+        height: heightAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0%', '120%'], // 높이 애니메이션 범위
             }),
           },
         ]}
-        {...panResponder.panHandlers}>
+        {...panResponder.panHandlers}
+      >
         <View style={styles.info}>
-          <View style={[styles.bottomItem,styles.shadow]}>
+          <View style={[styles.bottomItem, styles.shadow]}>
             <View style={styles.bottomText}>
-              <Text>경로 확인하기</Text>
-              {/* <Text>{pData}</Text> */}
-            {/* <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate('Contact')}>
-              <Text style={styles.buttonText}>알림 받기</Text>
-            </TouchableOpacity> */}
+              <Text style={{marginTop:10}}>경로 확인하기</Text>
             </View>
-            <PassLocation data={pData} />
-          </View>
+            <Animated.View
+              style={{
+                opacity: heightAnim.interpolate({
+                  inputRange: [0.15, 0.9], // 애니메이션 범위 조정
+                  outputRange: [0, 1], // 스와이프에 따라 opacity 변화
+                  extrapolate: 'clamp', // 범위 외의 값은 고정
+                }),
+              }}
+            >
+              {/* 경로 보여주는 컴포넌트 */}
+              <PassLocation data={pData} /> 
+            </Animated.View>
         </View>
-
-      </Animated.View>
-    </SafeAreaView>
+      </View>
+    </Animated.View>
+  </SafeAreaView>
   );
 };
 
@@ -388,8 +351,8 @@ const styles = StyleSheet.create({
     // backgroundColor:"blue"
   },
   top:{
-    flex:2.2,
-    backgroundColor: 'white',
+    // flex:1.9,
+    backgroundColor: '#47bf80',
     flexDirection : 'row',
 
   },
@@ -405,8 +368,9 @@ const styles = StyleSheet.create({
   },
   info:{
     flex: 1.0,
+    // marginTop: 3,
     width: '100%',
-    backgroundColor: 'white',
+    backgroundColor: '#47bf80',
     flexDirection : 'row',
   },
   container: {
@@ -442,17 +406,17 @@ const styles = StyleSheet.create({
   },
   bottomItem:{
     borderRadius: 30,
-    marginTop: 20,
+    marginTop: 50,
     marginRight:10,
     marginLeft:5,
     flex: 1,
     height: '50%', 
-    flexDirection : 'column'
+    flexDirection : 'column',
+    backgroundColor:'#47bf80'
   },
-  
   map: {
-    flex: 8.1,
-    
+    flex: 15,
+    backgroundColor:'#47bf80'
   },
   button: {
     backgroundColor: '#47bf80', // 버튼 배경색상 추가
@@ -465,5 +429,6 @@ const styles = StyleSheet.create({
     color: '#fff', // 버튼 글자색상 추가
     fontSize: 18,
     fontWeight: 'bold',
+    marginTop:10
   },
 });

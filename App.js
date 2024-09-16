@@ -49,48 +49,48 @@ function App() {
     console.log('Current pickLocation:', pickLocation);
   }, [pickLocation]);
 
-  useEffect(() => {
-    const getLocation = async () => {
-      const hasPermission = await requestLocationPermission();
-      if (hasPermission) {
-        Geolocation.getCurrentPosition(
-          position => {
-            const {latitude, longitude} = position.coords;
-            if (webViewRef.current) {
-              // webViewRef.current.injectJavaScript(
-              //   `initMap(${latitude}, ${longitude}); true;`,
-              // );
-            }
-          },
-          error => {
-            console.error(error);
-          },
-          {enableHighAccuracy: true},
-        );
+  // useEffect(() => {
+  //   const getLocation = async () => {
+  //     const hasPermission = await requestLocationPermission();
+  //     if (hasPermission) {
+  //       Geolocation.getCurrentPosition(
+  //         position => {
+  //           const {latitude, longitude} = position.coords;
+  //           if (webViewRef.current) {
+  //             // webViewRef.current.injectJavaScript(
+  //             //   `initMap(${latitude}, ${longitude}); true;`,
+  //             // );
+  //           }
+  //         },
+  //         error => {
+  //           console.error(error);
+  //         },
+  //         {enableHighAccuracy: true},
+  //       );
 
-        Geolocation.watchPosition(
-          position => {
-            const {latitude, longitude} = position.coords;
-            if (webViewRef.current) {
-              webViewRef.current.injectJavaScript(
-                `updatePosition(${latitude}, ${longitude}); true;`,
-              );
-            }
-          },
-          error => {
-            console.error(error);
-          },
-          {
-            enableHighAccuracy: true,
-            distanceFilter: 1,
-            interval: 5000,
-            fastestInterval: 2000,
-          },
-        );
-      }
-    };
-    getLocation();
-  }, []);
+  //       Geolocation.watchPosition(
+  //         position => {
+  //           const {latitude, longitude} = position.coords;
+  //           if (webViewRef.current) {
+  //             webViewRef.current.injectJavaScript(
+  //               `updatePosition(${latitude}, ${longitude}); true;`,
+  //             );
+  //           }
+  //         },
+  //         error => {
+  //           console.error(error);
+  //         },
+  //         {
+  //           enableHighAccuracy: true,
+  //           distanceFilter: 1,
+  //           interval: 5000,
+  //           fastestInterval: 2000,
+  //         },
+  //       );
+  //     }
+  //   };
+  //   getLocation();
+  // }, []);
 
   return (
     <pickContext.Provider

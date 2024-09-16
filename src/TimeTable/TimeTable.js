@@ -26,7 +26,7 @@ export const TimeTable = ({navigation}) => {
   const [data, setData] = useState([]);
   const [isHappy, setIsHappy] = useState(true);
   const heightAnim = useRef(new Animated.Value(1 - 50 / height)).current; // 초기 높이 값 (30%)
-  console.log(1 - 50 / height);
+
 
   const panResponder = useRef(
     PanResponder.create({
