@@ -7,7 +7,8 @@
 import React, { useEffect, useRef, useState  } from 'react';
 import { SafeAreaView, StyleSheet, Dimensions, PermissionsAndroid, Platform,View,Text ,TouchableOpacity,PanResponder,Animated,} from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
-import { WebView } from 'react-native-webview';
+// import { WebView } from 'react-native-webview';
+import MapView,{ PROVIDER_GOOGLE, Marker  } from 'react-native-maps';
 import {html} from '../util/apiKey.js';
 import {SelectOption} from '../components/Util/SelectOption';
 import {pickContext} from '../../App';
@@ -136,6 +137,7 @@ export const MyLocation = () => {
                           
                         }
                         setData(items);
+                        console.log(data);
                       },
                       error => {
                         console.log('필터링된 데이터 조회 에러:', error);
@@ -161,59 +163,112 @@ export const MyLocation = () => {
         fetchFilteredData(selectSt !== "0" ? selectSt : "", selectEd !== "0" ? selectEd : "");
     }, [selectSt, selectEd]);
 
-      useEffect(() => {
-        if (data.length > 0) {
-            webViewRef.current.injectJavaScript(`setMarker(${JSON.stringify(data)}); true;`);
-        }
-    }, [data]); // 데이터를 주입할 때 상태 업데이트 후에 주입
+    //   useEffect(() => {
+    //     if (data.length > 0) {
+    //         webViewRef.current.injectJavaScript(`setMarker(${JSON.stringify(data)}); true;`);
+    //     }
+    // }, [data]); // 데이터를 주입할 때 상태 업데이트 후에 주입
 
 
 
-    useEffect(() => {
-      const getLocation = async () => {
-        const hasPermission = await requestLocationPermission();
-        if (hasPermission) {
+    // useEffect(() => {
+    //   const getLocation = async () => {
+    //     const hasPermission = await requestLocationPermission();
+    //     if (hasPermission) {
   
-          Geolocation.watchPosition(
-            (position) => {
-              const { latitude, longitude } = position.coords;
-              if (webViewRef.current) {
-                // console.log(`Injecting updatePosition(${latitude}, ${longitude})`);
-                webViewRef.current.injectJavaScript(`updatePosition(${latitude}, ${longitude}); true;`);
+    //       Geolocation.watchPosition(
+    //         (position) => {
+    //           const { latitude, longitude } = position.coords;
+    //           if (webViewRef.current) {
+    //             // console.log(`Injecting updatePosition(${latitude}, ${longitude})`);
+    //             webViewRef.current.injectJavaScript(`updatePosition(${latitude}, ${longitude}); true;`);
               
-              }
-            },
-            (error) => {
-              console.error(error);
-            },
+    //           }
+    //         },
+    //         (error) => {
+    //           console.error(error);
+    //         },
+    //         {
+    //           enableHighAccuracy: true,
+    //           distanceFilter: 1,
+    //           interval: 5000,
+    //           fastestInterval: 2000,
+    //         }
+    //       );
+    //     }
+    //   };
+    //   getLocation();
+    // }, []);
+
+    const [location, setLocation] = useState({
+      latitude: 37.78825,
+      longitude: -122.4324,
+      latitudeDelta: 0.0922,
+      longitudeDelta: 0.0421,
+    });
+  
+    useEffect(() => {
+      const requestLocationPermission = async () => {
+        if (Platform.OS === 'android') {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
             {
-              enableHighAccuracy: true,
-              distanceFilter: 1,
-              interval: 5000,
-              fastestInterval: 2000,
+              title: '위치 권한 요청',
+              message: '앱에서 지도를 사용하려면 위치 권한이 필요합니다.',
+              buttonPositive: '확인',
             }
           );
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            getCurrentLocation();
+          }
+        } else {
+          getCurrentLocation();
         }
       };
-      getLocation();
+  
+      const getCurrentLocation = () => {
+        Geolocation.watchPosition(
+          position => {
+            const { latitude, longitude } = position.coords;
+            setLocation({
+              ...location,
+              latitude,
+              longitude,
+            });
+          },
+          error => {
+            console.error(error);
+          },
+          {
+            enableHighAccuracy: true,
+            distanceFilter: 0,
+            interval: 5000,
+            fastestInterval: 2000,
+          }
+        );
+      };
+  
+      requestLocationPermission();
+  
+      return () => {
+        Geolocation.clearWatch();
+      };
     }, []);
-
-
-  const handleWebViewLoad = () => {
-    console.log('WebView loaded');
-    Geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        if (webViewRef.current) {
-          webViewRef.current.injectJavaScript(`initMap(${latitude}, ${longitude}); true;`);
-        }
-      },
-      (error) => {
-        console.error(error);
-      },
-      { enableHighAccuracy: true }
-    );
-  };
+  // const handleWebViewLoad = () => {
+  //   console.log('WebView loaded');
+  //   Geolocation.getCurrentPosition(
+  //     (position) => {
+  //       const { latitude, longitude } = position.coords;
+  //       if (webViewRef.current) {
+  //         webViewRef.current.injectJavaScript(`initMap(${latitude}, ${longitude}); true;`);
+  //       }
+  //     },
+  //     (error) => {
+  //       console.error(error);
+  //     },
+  //     { enableHighAccuracy: true }
+  //   );
+  // };
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (evt, gestureState) => {
@@ -256,19 +311,26 @@ export const MyLocation = () => {
         <SelectOption />
       </View>
       <View style={styles.map}>
-        <WebView
-          ref={webViewRef}
-          originWhitelist={['*']}
-          source={{ html:html }}
-          style={styles.map}
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-          onError={(syntheticEvent) => {
-            const { nativeEvent } = syntheticEvent;
-            console.warn('WebView error: ', nativeEvent);
-          }}
-          onLoadEnd={handleWebViewLoad}
-        />
+        <MapView
+          style={{ flex: 1 }}
+          region={location}
+          showsUserLocation={true}
+          followsUserLocation={true}
+        >
+          {/* <Marker coordinate={location} /> */}
+          {data.map(marker => (
+            <Marker
+              key={marker.SEQ}
+              coordinate={{
+                latitude: marker?.LATITUDE,
+                longitude: marker?.LONGTITUDE,
+              }}
+              title={marker.title}
+            />
+          ))}
+        </MapView>
+
+    
       </View>
       <Animated.View style={[{
         height: heightAnim.interpolate({
@@ -282,7 +344,7 @@ export const MyLocation = () => {
         <View style={styles.info}>
           <View style={[styles.bottomItem, styles.shadow]}>
             <View style={styles.bottomText}>
-              <Text style={{marginTop:10}}>경로 확인하기</Text>
+              <Text style={{marginTop:10}}>경로 확인</Text>
             </View>
             <Animated.View
               style={{
@@ -415,8 +477,8 @@ const styles = StyleSheet.create({
     backgroundColor:'#47bf80'
   },
   map: {
-    flex: 15,
-    backgroundColor:'#47bf80'
+    flex: 1,
+    backgroundColor:'#47bf80',
   },
   button: {
     backgroundColor: '#47bf80', // 버튼 배경색상 추가
