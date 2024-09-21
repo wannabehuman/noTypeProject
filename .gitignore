@@ -77,7 +77,6 @@ yarn-error.log
 
 
 src/util/*
-android/app/src/main/AndroidManifest.xml
 apiKey.js
 ._apiKey.js
 apiKey.js.zip
@@ -85,3 +84,7 @@ gradlew.bat
 gradlew
 gradle-wrapper.jar
 gradle-wrapper.properties
+
+android/app/src/main/AndroidManifest.xml
+
+AndroidManifest.xml
