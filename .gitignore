@@ -85,6 +85,5 @@ gradlew
 gradle-wrapper.jar
 gradle-wrapper.properties
 
-android/app/src/main/AndroidManifest.xml
-
+android/app/src/main/
 AndroidManifest.xml
