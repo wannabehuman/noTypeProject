@@ -77,7 +77,7 @@ yarn-error.log
 
 
 src/util/*
-
+android/app/src/main/AnroidManifest.xml
 apiKey.js
 ._apiKey.js
 apiKey.js.zip
