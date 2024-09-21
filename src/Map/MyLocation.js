@@ -9,7 +9,6 @@ import { SafeAreaView, StyleSheet, Dimensions, PermissionsAndroid, Platform,View
 import Geolocation from 'react-native-geolocation-service';
 // import { WebView } from 'react-native-webview';
 import MapView,{ PROVIDER_GOOGLE, Marker  } from 'react-native-maps';
-import {html} from '../util/apiKey.js';
 import {SelectOption} from '../components/Util/SelectOption';
 import {pickContext} from '../../App';
 import PassLocation from '../components/Util/PassLocation';
@@ -17,27 +16,27 @@ import SQLite from 'react-native-sqlite-storage';
 SQLite.enablePromise(true);
 
 
-const requestLocationPermission = async () => {
-  if (Platform.OS === 'android') {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: '위치 권한',
-          message: '지도에서 자신의 위치를 확인하기 위해서는 위치 권한이 필요합니다',
-          buttonNeutral: '나중에 묻기',
-          buttonNegative: '아니오',
-          buttonPositive: '예',
-        },
-      );
-      return granted === PermissionsAndroid.RESULTS.GRANTED;
-    } catch (err) {
-      console.warn(err);
-      return false;
-    }
-  }
-  return true;
-};
+// const requestLocationPermission = async () => {
+//   if (Platform.OS === 'android') {
+//     try {
+//       const granted = await PermissionsAndroid.request(
+//         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+//         {
+//           title: '위치 권한',
+//           message: '지도에서 자신의 위치를 확인하기 위해서는 위치 권한이 필요합니다',
+//           buttonNeutral: '나중에 묻기',
+//           buttonNegative: '아니오',
+//           buttonPositive: '예',
+//         },
+//       );
+//       return granted === PermissionsAndroid.RESULTS.GRANTED;
+//     } catch (err) {
+//       console.warn(err);
+//       return false;
+//     }
+//   }
+//   return true;
+// };
 export const MyLocation = () => {
     const webViewRef = useRef(null);
     const {setPickLocation, setStOption, setEdOption, selectSt, selectEd} =
@@ -317,7 +316,6 @@ export const MyLocation = () => {
           showsUserLocation={true}
           followsUserLocation={true}
         >
-          {/* <Marker coordinate={location} /> */}
           {data.map(marker => (
             <Marker
               key={marker.SEQ}

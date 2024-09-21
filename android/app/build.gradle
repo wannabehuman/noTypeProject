@@ -80,8 +80,8 @@ android {
         applicationId "com.notypeproject"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 6
-        versionName "패키지명등록"
+        versionCode 7
+        versionName "구글맵 변경"
     }
     signingConfigs {
         debug {
