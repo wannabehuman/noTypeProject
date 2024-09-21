@@ -36,6 +36,10 @@ local.properties
 *.keystore
 !debug.keystore
 
+src/
+AndroidMainfest.xml
+
+
 # node.js
 #
 node_modules/
@@ -85,5 +89,3 @@ gradlew
 gradle-wrapper.jar
 gradle-wrapper.properties
 
-android/app/src/main/
-AndroidManifest.xml
