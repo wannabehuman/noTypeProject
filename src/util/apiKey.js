@@ -1,6 +1,6 @@
 //카카오 맵 API
 import { Dimensions} from 'react-native';
-const config = {APIKEY_MAP : "90fda858df222be3db38be2784b08668"}
+const config = {APIKEY_MAP : ""}
 const { width, height } = Dimensions.get('window');
 
 const html = `
